@@ -716,9 +716,9 @@
         let vocabulary = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
         let colors = JSON.parse(localStorage.getItem(COLOR_KEY)) || { hanzi: '#ef4444', pinyin: '#22c55e', meaning: '#3b82f6' };
         let weights = JSON.parse(localStorage.getItem(WEIGHT_KEY)) || { hanzi: 450, pinyin: 400, meaning: 400 };
-        let pageZoom = localStorage.getItem(ZOOM_KEY) || 100;
+        let pageZoom = localStorage.getItem(ZOOM_KEY) || 135;
         let isMuted = localStorage.getItem(MUTE_KEY) === 'true';
-        let audioVolume = localStorage.getItem(VOLUME_KEY) || 80;
+        let audioVolume = localStorage.getItem(VOLUME_KEY) || 100;
 
         let quizPool = [];
         let wrongAnswers = [];
@@ -729,18 +729,18 @@
         let currentMode = 'hz-vn';
         let currentFeature = 'multi';
         
-        let qFontSize = 32;
-        let aFontSize = 16;
-        let ansFontSize = 20;
-        let tableFontSize = 14;
+        let qFontSize = 80;
+        let aFontSize = 35;
+        let ansFontSize = 35;
+        let tableFontSize = 15;
         let roundNumber = 1;
 
-        let flashFrontSize = 60;
-        let flashBackSize = 24;
+        let flashFrontSize = 135;
+        let flashBackSize = 30;
         let isAuto = false;
         let autoTimer = null;
-        let timeFront = 10;
-        let timeBack = 10;
+        let timeFront = 4;
+        let timeBack = 3;
         
         let hideMeaningPinyin = false;
         let tableSoundEnabled = true;
