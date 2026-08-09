@@ -310,28 +310,25 @@
         .btn-flash-control { transition: all 0.2s; }
         .dark .btn-flash-control { background: var(--btn-gray-dark) !important; color: white !important; }
 
+        .flashcard-back.fade-out {
+            opacity: 0;
+            transform: scale(0.6) translateY(30px);
+            filter: blur(6px);
+            transition-delay: 0.1s;
+        }
 
+        .fade-in {
+            opacity: 0;
+            transform: scale(0.97);
+            animation: fadeInZoom 0.3s ease-out 0s forwards;
+        }
 
-
-.flashcard-back.fade-out {
-    opacity: 0;
-    transform: scale(0.6) translateY(30px); /* thu nhỏ rõ hơn + trôi xuống */
-    filter: blur(6px);
-    transition-delay: 0.1s;
-}
-
-.fade-in {
-    opacity: 0;
-    transform: scale(0.97);
-    animation: fadeInZoom 0.3s ease-out 0s forwards;
-}
-
-@keyframes fadeInZoom {
-    to {
-        opacity: 1;
-        transform: scale(1);
-    }
-}
+        @keyframes fadeInZoom {
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
     </style>
 </head>
 <body class="p-4 md:p-8">
@@ -436,36 +433,22 @@
             </div>
 
             <div class="bg-custom-card rounded-2xl border overflow-hidden shadow-sm">
+                <div class="flex justify-between items-center px-4 py-3 border-b">
+                    <span class="text-xs font-bold uppercase text-custom-muted">
+                        Danh sách từ vựng
+                    </span>
 
-    <div class="flex justify-between items-center px-4 py-3 border-b">
-        <span class="text-xs font-bold uppercase text-custom-muted">
-            Danh sách từ vựng
-        </span>
+                    <div class="flex gap-2">
+                        <button id="toggle-sound-btn" onclick="toggleTableSound()" class="w-[80px] h-8 bg-emerald-600 text-white rounded-lg text-[10px] font-bold uppercase">
+                            Tắt âm
+                        </button>
+                        <button id="toggle-hide-btn" onclick="toggleHideMeaningPinyin()" class="w-[80px] h-8 bg-emerald-600 text-white rounded-lg text-[10px] font-bold uppercase">
+                            Ẩn
+                        </button>
+                    </div>
+                </div>
 
-        <div class="flex gap-2">
-
-    <div class="flex gap-2">
-
-    <button
-        id="toggle-sound-btn"
-        onclick="toggleTableSound()"
-        class="w-[80px] h-8 bg-emerald-600 text-white rounded-lg text-[10px] font-bold uppercase">
-        Tắt âm
-    </button>
-
-    <button
-    id="toggle-hide-btn"
-    onclick="toggleHideMeaningPinyin()"
-    class="w-[80px] h-8 bg-emerald-600 text-white rounded-lg text-[10px] font-bold uppercase">
-    Ẩn
-</button>
-
-</div>
-
-</div>
-    </div>
-
-    <div class="overflow-x-auto">
+                <div class="overflow-x-auto">
                     <table class="vocab-table">
                         <thead>
                             <tr>
@@ -519,15 +502,18 @@
                             </label>
                         </div>
                         <div id="manual-modes" class="grid grid-cols-2 gap-3 hidden">
-                            <label class="relative">
-                                <input type="radio" name="q-mode-manual" value="vn-hz" checked class="hidden">
-                                <div class="radio-box">Nghĩa → Hán tự</div>
-                            </label>
-                            <label class="relative">
-                                <input type="radio" name="q-mode-manual" value="hz-hz" class="hidden">
-                                <div class="radio-box">Hán tự → Hán tự</div>
-                            </label>
-                        </div>
+
+    <label class="relative">
+        <input type="radio" name="q-mode-manual" value="hz-hz" class="hidden">
+        <div class="radio-box">Hán tự → Hán tự</div>
+    </label>
+
+    <label class="relative">
+        <input type="radio" name="q-mode-manual" value="vn-hz" checked class="hidden">
+        <div class="radio-box">Nghĩa → Hán tự</div>
+    </label>
+
+</div>
                     </div>
 
                     <div>
@@ -616,6 +602,37 @@
                     <div id="next-action" class="invisible">
                         <button onclick="nextQuestion()" class="btn-next-full">
                             <span>CÂU TIẾP THEO</span>
+                            <i class="fa-solid fa-arrow-right ml-2"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- BẢNG TỪ TRA LỜI SAI HẾT VÒNG 1 -->
+                <div id="wrong-summary-card" class="hidden space-y-4">
+                    <div class="bg-custom-card rounded-2xl border overflow-hidden shadow-sm p-4">
+                        <h3 class="text-sm font-bold text-red-500 uppercase tracking-wider mb-3 flex items-center gap-2">
+                            <i class="fa-solid fa-triangle-exclamation"></i> Danh sách từ trả lời sai
+                        </h3>
+                        <div class="overflow-x-auto">
+                            <table class="vocab-table">
+                                <thead>
+                                    <tr>
+                                        <th class="w-1/3">Hán tự</th>
+                                        <th class="w-1/3">Pinyin</th>
+                                        <th>Nghĩa</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="wrong-vocab-list" class="text-sm"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="flex gap-3 mt-4">
+                        <button onclick="exportWrongData()" class="btn-next-full bg-blue-600 hover:bg-blue-700 flex-1 mt-0">
+                            <i class="fa-solid fa-copy mr-2"></i>
+                            <span>XUẤT DATA</span>
+                        </button>
+                        <button onclick="startNextRound()" class="btn-next-full bg-emerald-600 hover:bg-emerald-700 flex-1 mt-0">
+                            <span>ÔN TẬP LẠI</span>
                             <i class="fa-solid fa-arrow-right ml-2"></i>
                         </button>
                     </div>
@@ -898,144 +915,85 @@
         }
 
         function renderTable() {
-    const tbody = document.getElementById('vocab-list');
-    tbody.innerHTML = '';
+            const tbody = document.getElementById('vocab-list');
+            tbody.innerHTML = '';
 
-    vocabulary.forEach((item, index) => {
+            vocabulary.forEach((item, index) => {
+                const showDetail = !hideMeaningPinyin || item.showDetail === true;
+                const tr = document.createElement('tr');
 
-        const showDetail =
-            !hideMeaningPinyin ||
-            item.showDetail === true;
+                if (item.learned) tr.classList.add('learned-row');
 
-        const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="hanzi-cell chinese-font" style="font-size:${tableFontSize * 1.7}px; line-height:1.2; cursor:pointer;" onclick="handleHanziClick(${index})">
+                        ${item.h}
+                    </td>
+                    <td class="pinyin-cell" style="font-size:${tableFontSize}px; line-height:1.2; ${showDetail ? '' : 'color:transparent;'}">
+                        ${showDetail ? item.p : '-'}
+                    </td>
+                    <td class="meaning-cell" style="font-size:${tableFontSize}px; line-height:1.2; ${showDetail ? '' : 'color:transparent;'}">
+                        ${showDetail ? item.m : '-'}
+                    </td>
+                    <td class="text-center">
+                        <input type="checkbox" class="custom-checkbox" ${item.learned ? 'checked' : ''} onchange="toggleLearned(${index})">
+                    </td>
+                `;
 
-        if (item.learned)
-            tr.classList.add('learned-row');
-
-        tr.innerHTML = `
-            <td
-                class="hanzi-cell chinese-font"
-                style="
-                    font-size:${tableFontSize * 1.7}px;
-                    line-height:1.2;
-                    cursor:pointer;
-                "
-                onclick="handleHanziClick(${index})"
-            >
-                ${item.h}
-            </td>
-
-            <td
-                class="pinyin-cell"
-                style="
-                    font-size:${tableFontSize}px;
-                    line-height:1.2;
-                    ${showDetail ? '' : 'color:transparent;'}
-                "
-            >
-                ${showDetail ? item.p : '-'}
-            </td>
-
-            <td
-                class="meaning-cell"
-                style="
-                    font-size:${tableFontSize}px;
-                    line-height:1.2;
-                    ${showDetail ? '' : 'color:transparent;'}
-                "
-            >
-                ${showDetail ? item.m : '-'}
-            </td>
-
-            <td class="text-center">
-                <input
-                    type="checkbox"
-                    class="custom-checkbox"
-                    ${item.learned ? 'checked' : ''}
-                    onchange="toggleLearned(${index})"
-                >
-            </td>
-        `;
-
-        tbody.appendChild(tr);
-    });
-}
+                tbody.appendChild(tr);
+            });
+        }
 
         function toggleLearned(index) {
             vocabulary[index].learned = !vocabulary[index].learned;
             localStorage.setItem(STORAGE_KEY, JSON.stringify(vocabulary));
             renderTable();
         }
+
         function toggleHideMeaningPinyin() {
+            hideMeaningPinyin = !hideMeaningPinyin;
+            const btn = document.getElementById('toggle-hide-btn');
 
-    hideMeaningPinyin = !hideMeaningPinyin;
+            if (hideMeaningPinyin) {
+                btn.innerText = 'Hiện';
+                btn.classList.remove('bg-orange-500', 'bg-emerald-600');
+                btn.classList.add('bg-red-600');
+            } else {
+                vocabulary.forEach(item => { item.showDetail = false; });
+                btn.innerText = 'Ẩn';
+                btn.classList.remove('bg-red-600');
+                btn.classList.add('bg-emerald-600');
+            }
+            renderTable();
+        }
 
-    const btn = document.getElementById('toggle-hide-btn');
+        function toggleRowDetail(index) {
+            if (!hideMeaningPinyin) return;
+            vocabulary[index].showDetail = !vocabulary[index].showDetail;
+            renderTable();
+        }
 
-    if (hideMeaningPinyin) {
+        function handleHanziClick(index) {
+            const item = vocabulary[index];
+            if (tableSoundEnabled) speakHanzi(item.h);
+            if (hideMeaningPinyin) toggleRowDetail(index);
+        }
 
-        btn.innerText = 'Hiện';
+        function toggleTableSound() {
+            tableSoundEnabled = !tableSoundEnabled;
+            const btn = document.getElementById('toggle-sound-btn');
 
-        // Đổi màu giống nút âm thanh
-        btn.classList.remove('bg-orange-500');
-        btn.classList.remove('bg-emerald-600');
-        btn.classList.add('bg-red-600');
+            if (tableSoundEnabled) {
+                btn.innerText = 'Tắt âm';
+                btn.classList.remove('bg-red-600');
+                btn.classList.add('bg-emerald-600');
+            } else {
+                btn.innerText = 'Bật âm';
+                btn.classList.remove('bg-emerald-600');
+                btn.classList.add('bg-red-600');
+            }
+        }
 
-    } else {
-
-        vocabulary.forEach(item => {
-            item.showDetail = false;
-        });
-
-        btn.innerText = 'Ẩn';
-
-        // Trở lại màu xanh
-        btn.classList.remove('bg-red-600');
-        btn.classList.add('bg-emerald-600');
-    }
-
-    renderTable();
-}
-
-function toggleRowDetail(index) {
-
-    if (!hideMeaningPinyin) return;
-
-    vocabulary[index].showDetail =
-        !vocabulary[index].showDetail;
-
-    renderTable();
-}
-function handleHanziClick(index) {
-
-    const item = vocabulary[index];
-
-    if (tableSoundEnabled) {
-        speakHanzi(item.h);
-    }
-
-    if (hideMeaningPinyin) {
-        toggleRowDetail(index);
-    }
-}
-function toggleTableSound() {
-
-    tableSoundEnabled = !tableSoundEnabled;
-
-    const btn = document.getElementById('toggle-sound-btn');
-
-    if (tableSoundEnabled) {
-        btn.innerText = 'Tắt âm';
-        btn.classList.remove('bg-red-600');
-        btn.classList.add('bg-emerald-600');
-    } else {
-        btn.innerText = 'Bật âm';
-        btn.classList.remove('bg-emerald-600');
-        btn.classList.add('bg-red-600');
-    }
-}
         function showTab(tabName) {
-            // Khi chuyển tab, thoát mọi trạng thái học hiện tại
             stopAuto();
             resetToSetup(); 
             showFlashcardSetup();
@@ -1093,6 +1051,9 @@ function toggleTableSound() {
 
             document.getElementById('quiz-setup').classList.add('hidden');
             document.getElementById('quiz-active').classList.remove('hidden');
+            document.getElementById('wrong-summary-card').classList.add('hidden');
+            document.getElementById('question-card').classList.remove('hidden');
+            document.getElementById('quiz-controls').classList.remove('hidden');
             showQuestion();
         }
 
@@ -1167,7 +1128,9 @@ function toggleTableSound() {
                 totalCorrect++;
             } else {
                 btn.classList.add('wrong');
-                wrongAnswers.push(correctItem);
+                if (!wrongAnswers.some(w => w.h === correctItem.h)) {
+                    wrongAnswers.push(correctItem);
+                }
                 const btns = document.querySelectorAll('.option-btn');
                 btns.forEach(b => {
                     const checkTxt = currentMode === 'hz-vn' ? correctItem.m : correctItem.h;
@@ -1192,7 +1155,9 @@ function toggleTableSound() {
                 totalCorrect++;
             } else {
                 inputEl.classList.add('wrong-input');
-                wrongAnswers.push(correctItem);
+                if (!wrongAnswers.some(w => w.h === correctItem.h)) {
+                    wrongAnswers.push(correctItem);
+                }
             }
             showAnswerDetails();
         }
@@ -1208,7 +1173,7 @@ function toggleTableSound() {
             slot1.className = "chinese-font text-color-hanzi leading-tight";
             slot1.style.fontSize = ansFontSize + 'px';
             slot2.innerHTML = `<span class="text-color-pinyin">${item.p}</span> <span class="mx-2 opacity-50">|</span> <span class="text-color-meaning">${item.m}</span>`;
-            slot2.style.fontSize = (ansFontSize * 0.6) + 'px';
+            slot2.style.fontSize = ansFontSize + 'px';
 
             document.getElementById('next-action').classList.remove('invisible');
             updateStats();
@@ -1222,19 +1187,60 @@ function toggleTableSound() {
                 showQuestion();
             } else {
                 if (wrongAnswers.length > 0) {
-                    quizPool = [...wrongAnswers];
-                    wrongAnswers = [];
-                    currentIndex = 0;
-                    roundNumber++;
-                    totalCorrect = 0;
-                    totalAttempts = 0;
-                    showQuestion();
+                    // Hiển thị Bảng tổng hợp các từ trả lời sai
+                    showWrongSummaryTable();
                 } else {
                     document.getElementById('quiz-controls').classList.add('hidden');
                     document.getElementById('question-card').classList.add('hidden');
+                    document.getElementById('wrong-summary-card').classList.add('hidden');
                     document.getElementById('completion-status').classList.remove('hidden');
                 }
             }
+        }
+
+        function showWrongSummaryTable() {
+            document.getElementById('question-card').classList.add('hidden');
+            document.getElementById('quiz-controls').classList.add('hidden');
+            
+            const tbody = document.getElementById('wrong-vocab-list');
+            tbody.innerHTML = '';
+            
+            wrongAnswers.forEach(item => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="hanzi-cell chinese-font" style="font-size:${tableFontSize * 1.7}px;">${item.h}</td>
+                    <td class="pinyin-cell" style="font-size:${tableFontSize}px;">${item.p}</td>
+                    <td class="meaning-cell" style="font-size:${tableFontSize}px;">${item.m}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            document.getElementById('wrong-summary-card').classList.remove('hidden');
+        }
+
+        function exportWrongData() {
+            if (wrongAnswers.length === 0) return;
+            const textToCopy = wrongAnswers.map(item => `${item.h} - ${item.p} - ${item.m}`).join('\n');
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                alert('Đã copy danh sách từ sai vào bộ nhớ tạm!');
+            }).catch(err => {
+                alert('Không thể copy tự động, hãy kiểm tra quyền trình duyệt.');
+            });
+        }
+
+        function startNextRound() {
+            quizPool = [...wrongAnswers];
+            wrongAnswers = [];
+            currentIndex = 0;
+            roundNumber++;
+            totalCorrect = 0;
+            totalAttempts = 0;
+
+            document.getElementById('wrong-summary-card').classList.add('hidden');
+            document.getElementById('question-card').classList.remove('hidden');
+            document.getElementById('quiz-controls').classList.remove('hidden');
+
+            showQuestion();
         }
 
         function updateStats() {
@@ -1248,6 +1254,7 @@ function toggleTableSound() {
             document.getElementById('quiz-active').classList.add('hidden');
             document.getElementById('quiz-controls').classList.remove('hidden');
             document.getElementById('question-card').classList.remove('hidden');
+            document.getElementById('wrong-summary-card').classList.add('hidden');
             document.getElementById('completion-status').classList.add('hidden');
         }
 
@@ -1267,107 +1274,95 @@ function toggleTableSound() {
         }
 
         function showFlashcard() {
-    const item = quizPool[currentIndex];
-    const inner = document.getElementById('flashcard-inner');
+            const item = quizPool[currentIndex];
+            const inner = document.getElementById('flashcard-inner');
 
-    // ✅ 1. Tắt animation tạm thời
-    inner.style.transition = 'none';
-    inner.classList.remove('is-flipped');
-
-    // ✅ 2. Force reflow (rất quan trọng)
-    void inner.offsetWidth;
-
-    // ✅ 3. Bật lại animation
-    inner.style.transition = 'transform 0.6s';
-
-    // 👉 Sau đó mới update nội dung
-    document.getElementById('flash-progress').innerText = `THẺ ${currentIndex + 1}/${quizPool.length}`;
-    
-    const hFront = document.getElementById('flash-h-front');
-hFront.classList.remove('fade-in');   // reset animation
-void hFront.offsetWidth;              // force reflow
-hFront.innerText = item.h;
-hFront.style.fontSize = flashFrontSize + 'px';
-hFront.classList.add('fade-in');
-
-    const hBack = document.getElementById('flash-h-back');
-hBack.classList.remove('fade-in');
-void hBack.offsetWidth;
-hBack.innerText = item.h;
-hBack.style.fontSize = flashFrontSize + 'px';
-hBack.classList.add('fade-in');
-
-    const pBack = document.getElementById('flash-p');
-    pBack.innerText = item.p;
-    pBack.style.fontSize = flashBackSize + 'px';
-
-    const mBack = document.getElementById('flash-m');
-    mBack.innerText = item.m;
-    mBack.style.fontSize = flashBackSize + 'px';
-
-    // Auto
-    if (isAuto) {
-        autoTimer = setTimeout(() => { flipCard(); }, timeFront * 1000);
-    }
-}
-
-        function flipCard() {
-    const inner = document.getElementById('flashcard-inner');
-    const isFlipped = inner.classList.contains('is-flipped');
-    
-    if (!isFlipped) {
-        inner.classList.add('is-flipped');
-
-        // Mặt trước → mặt sau
-        if (!isMuted) speakHanzi(quizPool[currentIndex].h);
-
-        if (isAuto) {
-            clearTimeout(autoTimer);
-            autoTimer = setTimeout(() => { nextFlashcard(); }, timeBack * 1000);
-        }
-    } else {
-    inner.classList.remove('is-flipped');
-
-    if (!isMuted) speakHanzi(quizPool[currentIndex].h);
-}
-}
-
-function nextFlashcard() {
-    const inner = document.getElementById('flashcard-inner');
-    const hFront = document.getElementById('flash-h-front');
-
-    if (isAuto) {
-        // ✅ 1. Lật về mặt trước
-        inner.classList.remove('is-flipped');
-
-        // ✅ 2. NGAY LẬP TỨC làm trắng mặt trước
-        hFront.classList.remove('fade-in');
-        hFront.style.opacity = '0';
-        hFront.innerText = ''; // 💥 xoá nội dung cũ
-
-        // (tuỳ chọn: xoá luôn back để chắc chắn)
-        document.getElementById('flash-h-back').innerText = '';
-        document.getElementById('flash-p').innerText = '';
-        document.getElementById('flash-m').innerText = '';
-
-        // ✅ 3. Đợi flip xong
-        setTimeout(() => {
-            currentIndex = (currentIndex + 1) % quizPool.length;
-
-            // reset trạng thái flip
             inner.style.transition = 'none';
             inner.classList.remove('is-flipped');
+
             void inner.offsetWidth;
+
             inner.style.transition = 'transform 0.6s';
 
-            // ✅ 4. Load thẻ mới
-            showFlashcard();
-        }, 600);
-    } else {
-        currentIndex = (currentIndex + 1) % quizPool.length;
-        showFlashcard();
-    }
-}
+            document.getElementById('flash-progress').innerText = `THẺ ${currentIndex + 1}/${quizPool.length}`;
+            
+            const hFront = document.getElementById('flash-h-front');
+            hFront.classList.remove('fade-in');
+            void hFront.offsetWidth;
+            hFront.innerText = item.h;
+            hFront.style.fontSize = flashFrontSize + 'px';
+            hFront.classList.add('fade-in');
+
+            const hBack = document.getElementById('flash-h-back');
+            hBack.classList.remove('fade-in');
+            void hBack.offsetWidth;
+            hBack.innerText = item.h;
+            hBack.style.fontSize = flashFrontSize + 'px';
+            hBack.classList.add('fade-in');
+
+            const pBack = document.getElementById('flash-p');
+            pBack.innerText = item.p;
+            pBack.style.fontSize = flashBackSize + 'px';
+
+            const mBack = document.getElementById('flash-m');
+            mBack.innerText = item.m;
+            mBack.style.fontSize = flashBackSize + 'px';
+
+            if (isAuto) {
+                autoTimer = setTimeout(() => { flipCard(); }, timeFront * 1000);
+            }
+        }
+
+        function flipCard() {
+            const inner = document.getElementById('flashcard-inner');
+            const isFlipped = inner.classList.contains('is-flipped');
+            
+            if (!isFlipped) {
+                inner.classList.add('is-flipped');
+
+                if (!isMuted) speakHanzi(quizPool[currentIndex].h);
+
+                if (isAuto) {
+                    clearTimeout(autoTimer);
+                    autoTimer = setTimeout(() => { nextFlashcard(); }, timeBack * 1000);
+                }
+            } else {
+                inner.classList.remove('is-flipped');
+
+                if (!isMuted) speakHanzi(quizPool[currentIndex].h);
+            }
+        }
+
+        function nextFlashcard() {
+            const inner = document.getElementById('flashcard-inner');
+            const hFront = document.getElementById('flash-h-front');
+
+            if (isAuto) {
+                inner.classList.remove('is-flipped');
+
+                hFront.classList.remove('fade-in');
+                hFront.style.opacity = '0';
+                hFront.innerText = '';
+
+                document.getElementById('flash-h-back').innerText = '';
+                document.getElementById('flash-p').innerText = '';
+                document.getElementById('flash-m').innerText = '';
+
+                setTimeout(() => {
+                    currentIndex = (currentIndex + 1) % quizPool.length;
+
+                    inner.style.transition = 'none';
+                    inner.classList.remove('is-flipped');
+                    void inner.offsetWidth;
+                    inner.style.transition = 'transform 0.6s';
+
+                    showFlashcard();
+                }, 600);
+            } else {
+                currentIndex = (currentIndex + 1) % quizPool.length;
+                showFlashcard();
+            }
+        }
 
         function prevFlashcard() {
             currentIndex = (currentIndex - 1 + quizPool.length) % quizPool.length;
