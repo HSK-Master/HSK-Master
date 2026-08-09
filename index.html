@@ -3,9 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tổng hợp dữ liệu</title>
+    <title>Tổng hợp dữ liệu - HSK Master</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Thư viện đọc file Excel -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+SC:wght@400;500;700&display=swap');
         :root {
@@ -16,7 +18,7 @@
             --border-color: #e2e8f0;
             --input-bg: #f8fafc;
             --setting-item-bg: #f1f5f9; 
-            --btn-gray-dark: #111827; /* Màu xám đậm cho Dark Mode */
+            --btn-gray-dark: #111827;
         }
 
         .dark {
@@ -103,7 +105,6 @@
             display: none !important;
         }
 
-        /* Style cho nút Câu tiếp theo và các nút Darkmode */
         .btn-next-full {
             background: #3b82f6;
             color: white;
@@ -239,6 +240,26 @@
         }
         .custom-checkbox { cursor: pointer; width: 16px; height: 16px; accent-color: #3b82f6; }
 
+        /* Custom scrollbar cho danh sách chọn bài học */
+        .lesson-scroll-box {
+            max-height: 160px;
+            overflow-y: auto;
+            border: 1px solid var(--border-color);
+            background: var(--input-bg);
+            border-radius: 12px;
+            padding: 8px;
+        }
+        .lesson-scroll-box::-webkit-scrollbar {
+            width: 6px;
+        }
+        .lesson-scroll-box::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        .dark .lesson-scroll-box::-webkit-scrollbar-thumb {
+            background: #334155;
+        }
+
         .flashcard-container { perspective: 1000px; width: 100%; height: 320px; cursor: pointer; margin-bottom: 24px; }
         .flashcard-inner {
             position: relative;
@@ -286,7 +307,6 @@
             width: 100%;
         }
 
-        /* Nút thoát đặc biệt */
         .btn-exit-styled {
             background: #ef4444;
             color: white;
@@ -306,7 +326,6 @@
         .dark .btn-exit-styled { background: var(--btn-gray-dark); box-shadow: none; }
         .btn-exit-styled:hover { opacity: 0.9; transform: scale(1.02); }
 
-        /* Nút Flashcard cụ thể cho Dark Mode */
         .btn-flash-control { transition: all 0.2s; }
         .dark .btn-flash-control { background: var(--btn-gray-dark) !important; color: white !important; }
 
@@ -364,10 +383,55 @@
     <main class="max-w-2xl mx-auto">
         <!-- TAB DỮ LIỆU -->
         <div id="tab-data" class="space-y-4">
-            <div class="bg-custom-card p-5 rounded-2xl border shadow-sm">
-                <label class="text-[11px] font-bold text-custom-muted uppercase tracking-wider mb-2 block">Dán dữ liệu từ Excel (Hán tự - Pinyin - Nghĩa)</label>
-                <textarea id="bulk-input" rows="4" class="custom-input text-sm" placeholder="Ví dụ: 你好 - nǐhǎo - Xin chào"></textarea>
-                <div class="mt-4 flex gap-3">
+            <div class="bg-custom-card p-5 rounded-2xl border shadow-sm space-y-4">
+                <!-- Chọn phương thức nhập -->
+                <div>
+                    <label class="text-[11px] font-bold text-custom-muted uppercase tracking-wider mb-2 block">Nguồn dữ liệu</label>
+                    <div class="grid grid-cols-2 gap-3">
+                        <label class="relative">
+                            <input type="radio" name="data-source-type" value="manual" checked class="hidden" onchange="toggleDataSourceMode()">
+                            <div class="radio-box">Nhập Data</div>
+                        </label>
+                        <label class="relative">
+                            <input type="radio" name="data-source-type" value="excel" class="hidden" onchange="toggleDataSourceMode()">
+                            <div class="radio-box">Excel</div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Dán thủ công -->
+                <div id="input-mode-manual">
+                    <label class="text-[11px] font-bold text-custom-muted uppercase tracking-wider mb-2 block">Dán dữ liệu từ Excel (Hán tự - Pinyin - Nghĩa)</label>
+                    <textarea id="bulk-input" rows="4" class="custom-input text-sm" placeholder="Ví dụ: 你好 - nǐhǎo - Xin chào"></textarea>
+                </div>
+
+                <!-- Tải file Excel -->
+                <div id="input-mode-excel" class="hidden space-y-3">
+                    <div>
+                        <label class="text-[11px] font-bold text-custom-muted uppercase tracking-wider mb-2 block">Chọn File Excel (.xlsx, .xls)</label>
+                        <input type="file" id="excel-file-input" accept=".xlsx, .xls" onchange="handleExcelUpload(event)" class="custom-input text-xs">
+                        <p class="text-[10px] text-custom-muted mt-1 italic">* Cột 1: STT bài học | Cột 2: Hán tự - Nghĩa - Pinyin (ví dụ: 你好 - nǐhǎo - Xin chào)</p>
+                    </div>
+
+                    <!-- Thanh cuộn chọn bài học -->
+                    <div id="lesson-select-container" class="hidden space-y-2">
+                        <div class="flex justify-between items-center">
+                            <label class="text-[11px] font-bold text-custom-muted uppercase tracking-wider">Chọn bài học</label>
+                            <div class="flex gap-2">
+                                <button onclick="selectAllLessons(true)" class="text-[10px] text-blue-500 font-bold hover:underline">Chọn tất cả</button>
+                                <span class="text-[10px] text-custom-muted">|</span>
+                                <button onclick="selectAllLessons(false)" class="text-[10px] text-red-500 font-bold hover:underline">Bỏ chọn</button>
+                            </div>
+                        </div>
+
+                        <!-- Danh sách cuộn chọn bài (4 bài trên 1 hàng) -->
+                        <div id="lesson-checkbox-list" class="lesson-scroll-box grid grid-cols-2 sm:grid-cols-4 gap-1.5 text-xs font-semibold">
+                            <!-- JS tự tạo danh sách bài ở đây -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pt-2 flex gap-3">
                     <button onclick="saveData()" class="bg-blue-600 text-white px-8 py-3 rounded-xl text-xs font-bold hover:bg-blue-700 transition-all shadow-md uppercase flex-1">CẬP NHẬT DANH SÁCH</button>
                     <button onclick="showTab('quiz')" class="bg-emerald-600 text-white px-8 py-3 rounded-xl text-xs font-bold hover:bg-emerald-700 transition-all shadow-md uppercase flex-1 flex items-center justify-center gap-2">
                         BẮT ĐẦU <i class="fa-solid fa-chevron-right text-[10px]"></i>
@@ -502,18 +566,16 @@
                             </label>
                         </div>
                         <div id="manual-modes" class="grid grid-cols-2 gap-3 hidden">
+                            <label class="relative">
+                                <input type="radio" name="q-mode-manual" value="hz-hz" class="hidden">
+                                <div class="radio-box">Hán tự → Hán tự</div>
+                            </label>
 
-    <label class="relative">
-        <input type="radio" name="q-mode-manual" value="hz-hz" class="hidden">
-        <div class="radio-box">Hán tự → Hán tự</div>
-    </label>
-
-    <label class="relative">
-        <input type="radio" name="q-mode-manual" value="vn-hz" checked class="hidden">
-        <div class="radio-box">Nghĩa → Hán tự</div>
-    </label>
-
-</div>
+                            <label class="relative">
+                                <input type="radio" name="q-mode-manual" value="vn-hz" checked class="hidden">
+                                <div class="radio-box">Nghĩa → Hán tự</div>
+                            </label>
+                        </div>
                     </div>
 
                     <div>
@@ -737,6 +799,8 @@
         let isMuted = localStorage.getItem(MUTE_KEY) === 'true';
         let audioVolume = localStorage.getItem(VOLUME_KEY) || 100;
 
+        let excelDataByLesson = {}; // Lưu danh sách bài học lấy từ Excel
+
         let quizPool = [];
         let wrongAnswers = [];
         let currentIndex = 0;
@@ -789,6 +853,144 @@
                 }
             });
         };
+
+        function toggleDataSourceMode() {
+            const sourceType = document.querySelector('input[name="data-source-type"]:checked').value;
+            if (sourceType === 'manual') {
+                document.getElementById('input-mode-manual').classList.remove('hidden');
+                document.getElementById('input-mode-excel').classList.add('hidden');
+            } else {
+                document.getElementById('input-mode-manual').classList.add('hidden');
+                document.getElementById('input-mode-excel').classList.remove('hidden');
+            }
+        }
+
+        function parseVocabString(textStr) {
+            if (!textStr) return null;
+            const parts = textStr.includes('\t') ? textStr.split('\t') : textStr.split(' - ');
+            if (parts.length < 2) return null;
+
+            let h = parts[0]?.trim() || '';
+            let p = '';
+            let m = '';
+
+            const hasPinyinTone = (str) => /[āáǎàēéěèīíǐìōóǒòūúǔùǖǘǚǜ]/i.test(str);
+
+            if (parts.length >= 3) {
+                if (hasPinyinTone(parts[1])) {
+                    p = parts[1].trim();
+                    m = parts[2].trim();
+                } else if (hasPinyinTone(parts[2])) {
+                    m = parts[1].trim();
+                    p = parts[2].trim();
+                } else {
+                    p = parts[1].trim();
+                    m = parts[2].trim();
+                }
+            } else if (parts.length === 2) {
+                if (hasPinyinTone(parts[1])) {
+                    p = parts[1].trim();
+                } else {
+                    m = parts[1].trim();
+                }
+            }
+
+            return { h, p, m, learned: false };
+        }
+
+        function handleExcelUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+                const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                const rows = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+
+                excelDataByLesson = {};
+
+                rows.forEach(row => {
+                    if (row && row.length >= 2) {
+                        const lessonNo = String(row[0]).trim();
+                        const content = String(row[1]).trim();
+                        const parsed = parseVocabString(content);
+
+                        if (lessonNo && parsed && parsed.h) {
+                            if (!excelDataByLesson[lessonNo]) {
+                                excelDataByLesson[lessonNo] = [];
+                            }
+                            excelDataByLesson[lessonNo].push(parsed);
+                        }
+                    }
+                });
+
+                const availableLessons = Object.keys(excelDataByLesson).sort((a, b) => {
+                    return (parseFloat(a) || 0) - (parseFloat(b) || 0);
+                });
+
+                if (availableLessons.length > 0) {
+                    renderLessonCheckboxes(availableLessons);
+                    document.getElementById('lesson-select-container').classList.remove('hidden');
+                } else {
+                    alert("Không tìm thấy dữ liệu bài học hợp lệ trong file Excel!");
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        // Tạo danh sách checkbox bài học vào khung cuộn
+        function renderLessonCheckboxes(lessons) {
+            const container = document.getElementById('lesson-checkbox-list');
+            container.innerHTML = '';
+
+            lessons.forEach(lesson => {
+                const label = document.createElement('label');
+                label.className = 'flex items-center gap-1.5 p-1 rounded cursor-pointer hover:bg-blue-500/10 transition-all';
+                label.innerHTML = `
+                    <input type="checkbox" class="lesson-checkbox custom-checkbox" value="${lesson}" checked>
+                    <span class="truncate"> ${lesson} (${excelDataByLesson[lesson].length} từ)</span>
+                `;
+                container.appendChild(label);
+            });
+        }
+
+        function selectAllLessons(checked) {
+            const checkboxes = document.querySelectorAll('.lesson-checkbox');
+            checkboxes.forEach(cb => cb.checked = checked);
+        }
+
+        function saveData() {
+            const sourceType = document.querySelector('input[name="data-source-type"]:checked').value;
+            let newVocab = [];
+
+            if (sourceType === 'manual') {
+                const input = document.getElementById('bulk-input').value.trim();
+                if (!input) { alert("Hãy dán dữ liệu!"); return; }
+                const rows = input.split('\n');
+                newVocab = rows.map(row => parseVocabString(row)).filter(item => item && item.h);
+                document.getElementById('bulk-input').value = '';
+            } else {
+                const checkedBoxes = document.querySelectorAll('.lesson-checkbox:checked');
+                if (checkedBoxes.length === 0) {
+                    alert("Hãy chọn ít nhất 1 bài học!");
+                    return;
+                }
+
+                checkedBoxes.forEach(cb => {
+                    const lNum = cb.value;
+                    if (excelDataByLesson[lNum]) {
+                        newVocab = newVocab.concat(excelDataByLesson[lNum]);
+                    }
+                });
+            }
+
+            vocabulary = newVocab;
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(vocabulary));
+            renderTable();
+            alert(`Đã cập nhật ${newVocab.length} từ vựng!`);
+        }
 
         function initAudioSettings() {
             const volSlider = document.getElementById('audio-volume-slider');
@@ -891,27 +1093,6 @@
                 .option-btn, #user-answer { font-weight: ${weights.hanzi}; }
             `;
             if (!document.getElementById(styleId)) document.head.appendChild(styleEl);
-        }
-
-        function saveData() {
-            const input = document.getElementById('bulk-input').value.trim();
-            if (!input) { alert("Hãy dán dữ liệu!"); return; }
-            const rows = input.split('\n');
-            const newVocab = rows.map(row => {
-                const parts = row.split('\t').length > 1 ? row.split('\t') : row.split(' - ');
-                return {
-                    h: parts[0]?.trim() || '',
-                    p: parts[1]?.trim() || '',
-                    m: parts[2]?.trim() || '',
-                    learned: false
-                };
-            }).filter(item => item.h && item.m);
-
-            vocabulary = newVocab;
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(vocabulary));
-            renderTable();
-            document.getElementById('bulk-input').value = '';
-            alert(`Đã cập nhật ${newVocab.length} từ vựng!`);
         }
 
         function renderTable() {
@@ -1187,7 +1368,6 @@
                 showQuestion();
             } else {
                 if (wrongAnswers.length > 0) {
-                    // Hiển thị Bảng tổng hợp các từ trả lời sai
                     showWrongSummaryTable();
                 } else {
                     document.getElementById('quiz-controls').classList.add('hidden');
