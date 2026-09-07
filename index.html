@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tổng hợp dữ liệu - HSK Master</title>
+    <title>Tổng hợp dữ liệu</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Thư viện đọc file Excel -->
@@ -384,6 +384,201 @@
         @keyframes fadeInZoom {
             to { opacity: 1; transform: scale(1); }
         }
+
+        /* =========================================================
+           CHẾ ĐỘ THIẾT BỊ: MÁY TÍNH / ĐIỆN THOẠI
+           Máy tính giữ nguyên giao diện cũ.
+           Điện thoại:
+           - Trắc nghiệm: 4 đáp án = 4 hàng.
+           - Flashcard: Hán tự trên; Pinyin + Nghĩa bên dưới,
+             không dùng hiệu ứng lật.
+           ========================================================= */
+        body.phone-mode {
+            padding-left: 12px !important;
+            padding-right: 12px !important;
+        }
+
+        body.phone-mode .max-w-2xl {
+            max-width: 100% !important;
+        }
+
+        body.phone-mode .option-grid {
+            grid-template-columns: 1fr !important;
+            gap: 10px !important;
+        }
+
+        body.phone-mode .option-btn {
+            width: 100%;
+            min-height: 58px;
+            padding: 12px 14px;
+        }
+
+        body.phone-mode .flashcard-container {
+            height: auto !important;
+            min-height: 0 !important;
+            perspective: none !important;
+            cursor: pointer;
+        }
+
+        body.phone-mode .flashcard-inner {
+            height: auto !important;
+            min-height: 0 !important;
+            transform: none !important;
+            transition: none !important;
+            transform-style: flat !important;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        body.phone-mode .flashcard-front,
+        body.phone-mode .flashcard-back {
+            position: relative !important;
+            inset: auto !important;
+            width: 100% !important;
+            height: auto !important;
+            min-height: 0 !important;
+            -webkit-backface-visibility: visible !important;
+            backface-visibility: visible !important;
+            transform: none !important;
+            box-sizing: border-box;
+        }
+
+        /* Mặt trước: luôn hiển thị Hán tự. */
+        body.phone-mode .flashcard-front {
+            flex: 0 0 auto;
+            min-height: 190px !important;
+            border-radius: 20px;
+        }
+
+        /* Mặt sau chuyển thành "phần đáp án" nằm dưới mặt trước,
+           nhưng chỉ xuất hiện sau khi người dùng chạm hoặc Auto đến thời điểm lật. */
+        body.phone-mode .flashcard-back {
+            display: none !important;
+            flex: 0 0 auto;
+            min-height: 145px !important;
+            padding: 20px 12px !important;
+            flex-direction: column !important;
+            justify-content: center !important;
+            align-items: center !important;
+            gap: 8px !important;
+            border-radius: 20px;
+        }
+
+        body.phone-mode .flashcard-inner.phone-revealed .flashcard-back {
+            display: flex !important;
+            animation: phoneFlashReveal 0.35s ease-out;
+        }
+
+        body.phone-mode .back-divider {
+            display: none !important;
+        }
+
+        body.phone-mode .back-left {
+            display: none !important;
+        }
+
+        body.phone-mode .back-right {
+            width: 100% !important;
+            order: 2;
+        }
+
+        body.phone-mode #flash-h-back {
+            display: none !important;
+        }
+
+        body.phone-mode #flash-h-front {
+            opacity: 1 !important;
+            transform: none !important;
+        }
+
+        @keyframes phoneFlashReveal {
+            from { opacity: 0; transform: translateY(-6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        body.phone-mode #global-audio-controls {
+            gap: 6px;
+        }
+
+        /* Thanh điều hướng Flashcard trên điện thoại luôn cố định ở đáy màn hình.
+           Khi Pinyin + Nghĩa xuất hiện, nội dung phía trên thay đổi chiều cao nhưng
+           thanh điều hướng không bị đẩy xuống theo. */
+        body.phone-mode #flashcard-active {
+            padding-bottom: 86px !important;
+        }
+
+        body.phone-mode #flashcard-active > .flex.gap-3 {
+            position: fixed !important;
+            left: 12px !important;
+            right: 12px !important;
+            bottom: 10px !important;
+            width: auto !important;
+            z-index: 1000 !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+
+        body.phone-mode #flashcard-active > .flex.gap-3 .btn-flash-control {
+            min-height: 56px;
+            box-shadow: 0 4px 12px rgb(0 0 0 / 0.18);
+        }
+
+        @media (max-width: 640px) {
+            body.phone-mode {
+                padding-top: 10px !important;
+                padding-bottom: 10px !important;
+            }
+
+            body.phone-mode > .max-w-2xl:first-child {
+                margin-bottom: 12px !important;
+            }
+
+            body.phone-mode > .max-w-2xl:first-child > div:last-child {
+                gap: 6px;
+                flex-wrap: wrap;
+                justify-content: flex-end;
+            }
+
+            body.phone-mode .icon-btn-40 {
+                flex: 0 0 40px;
+            }
+
+            body.phone-mode .q-card {
+                padding: 16px 12px;
+                min-height: 110px;
+            }
+
+            body.phone-mode .q-details {
+                padding-left: 10px;
+            }
+
+            body.phone-mode .flashcard-front {
+                min-height: 180px !important;
+            }
+
+            body.phone-mode .flashcard-back {
+                min-height: 130px !important;
+            }
+
+            body.phone-mode #flashcard-active {
+                padding-bottom: 78px !important;
+            }
+
+            body.phone-mode #flashcard-active > .flex.gap-3 {
+                left: 8px !important;
+                right: 8px !important;
+                bottom: 8px !important;
+                gap: 6px !important;
+            }
+
+            body.phone-mode #flashcard-active > .flex.gap-3 .btn-flash-control {
+                min-height: 52px;
+                padding-left: 8px !important;
+                padding-right: 8px !important;
+                white-space: nowrap;
+            }
+        }
     </style>
 </head>
 <body class="p-4 md:p-8">
@@ -420,7 +615,10 @@
                 </button>
             </div>
 
-            <button onclick="toggleDarkMode()" class="icon-btn-40">
+            <button id="btn-device-mode" onclick="toggleDeviceMode()" class="icon-btn-40" title="Chuyển chế độ Máy tính/Điện thoại" aria-label="Chuyển chế độ Máy tính/Điện thoại">
+                <i id="device-mode-icon" class="fa-solid fa-desktop"></i>
+            </button>
+            <button onclick="toggleDarkMode()" class="icon-btn-40" title="Bật/Tắt Dark Mode" aria-label="Bật/Tắt Dark Mode">
                 <i id="theme-icon" class="fa-solid fa-moon"></i>
             </button>
             <div class="flex bg-custom-card border rounded-xl p-1 shadow-sm">
@@ -833,6 +1031,7 @@
         const STORAGE_KEY = 'vocal_db_v25';
         const COLOR_KEY = 'vocal_colors_config_v2';
         const THEME_KEY = 'vocal_theme_preference';
+        const DEVICE_MODE_KEY = 'vocal_device_mode_preference';
         const WEIGHT_KEY = 'vocal_weight_config';
         const ZOOM_KEY = 'vocal_page_zoom';
         const MUTE_KEY = 'vocal_mute_preference';
@@ -845,6 +1044,7 @@
         let colors = JSON.parse(localStorage.getItem(COLOR_KEY)) || { hanzi: '#ef4444', pinyin: '#22c55e', meaning: '#3b82f6' };
         let weights = JSON.parse(localStorage.getItem(WEIGHT_KEY)) || { hanzi: 450, pinyin: 400, meaning: 400 };
         let pageZoom = localStorage.getItem(ZOOM_KEY) || 135;
+        let deviceMode = localStorage.getItem(DEVICE_MODE_KEY) || 'desktop';
         let isMuted = localStorage.getItem(MUTE_KEY) === 'true';
         let zhVolume = localStorage.getItem(ZH_VOLUME_KEY) !== null ? localStorage.getItem(ZH_VOLUME_KEY) : 100;
         let vnVolume = localStorage.getItem(VN_VOLUME_KEY) !== null ? localStorage.getItem(VN_VOLUME_KEY) : 50;
@@ -883,6 +1083,7 @@
 
         window.onload = () => {
             initTheme();
+            initDeviceMode();
             initColors();
             initZoom();
             initAudioSettings();
@@ -1153,6 +1354,58 @@
             const isDark = document.documentElement.classList.toggle('dark');
             document.getElementById('theme-icon').className = isDark ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
             localStorage.setItem(THEME_KEY, isDark ? 'dark' : 'light');
+        }
+
+        function initDeviceMode() {
+            const savedMode = localStorage.getItem(DEVICE_MODE_KEY);
+            deviceMode = savedMode === 'phone' ? 'phone' : 'desktop';
+
+            document.body.classList.toggle('phone-mode', deviceMode === 'phone');
+            updateDeviceModeUI();
+        }
+
+        function toggleDeviceMode() {
+            stopAuto();
+
+            deviceMode = deviceMode === 'desktop' ? 'phone' : 'desktop';
+            localStorage.setItem(DEVICE_MODE_KEY, deviceMode);
+            document.body.classList.toggle('phone-mode', deviceMode === 'phone');
+            updateDeviceModeUI();
+
+            if (currentActiveTab === 'flashcard' &&
+                !document.getElementById('flashcard-active').classList.contains('hidden') &&
+                quizPool.length > 0) {
+                showFlashcard();
+            }
+
+            if (currentActiveTab === 'quiz' &&
+                !document.getElementById('quiz-active').classList.contains('hidden') &&
+                quizPool.length > 0 &&
+                currentIndex < quizPool.length) {
+                showQuestion();
+            }
+        }
+
+        function updateDeviceModeUI() {
+            const btn = document.getElementById('btn-device-mode');
+            const icon = document.getElementById('device-mode-icon');
+            if (!btn || !icon) return;
+
+            if (deviceMode === 'phone') {
+                icon.className = 'fa-solid fa-mobile-screen-button';
+                btn.title = 'Đang ở chế độ Điện thoại — chuyển sang Máy tính';
+                btn.setAttribute('aria-label', 'Đang ở chế độ Điện thoại — chuyển sang Máy tính');
+                btn.style.backgroundColor = '#3b82f6';
+                btn.style.color = 'white';
+                btn.style.borderColor = '#3b82f6';
+            } else {
+                icon.className = 'fa-solid fa-desktop';
+                btn.title = 'Đang ở chế độ Máy tính — chuyển sang Điện thoại';
+                btn.setAttribute('aria-label', 'Đang ở chế độ Máy tính — chuyển sang Điện thoại');
+                btn.style.backgroundColor = '';
+                btn.style.color = '';
+                btn.style.borderColor = '';
+            }
         }
 
         function initColors() {
@@ -1587,13 +1840,8 @@
             const item = quizPool[currentIndex];
             const inner = document.getElementById('flashcard-inner');
 
-            inner.style.transition = 'none';
-            inner.classList.remove('is-flipped');
-            void inner.offsetWidth;
-            inner.style.transition = 'transform 0.6s';
-
             document.getElementById('flash-progress').innerText = `THẺ ${currentIndex + 1}/${quizPool.length}`;
-            
+
             const hFront = document.getElementById('flash-h-front');
             hFront.classList.remove('fade-in');
             void hFront.offsetWidth;
@@ -1616,15 +1864,40 @@
             mBack.innerText = item.m;
             mBack.style.fontSize = flashBackSize + 'px';
 
+            if (deviceMode === 'phone') {
+                // Điện thoại: bắt đầu chỉ hiển thị Hán tự.
+                // Sau timeFront (khi Auto) mới hiện Pinyin + Nghĩa và phát âm,
+                // tương đương thời điểm "lật thẻ" trên máy tính.
+                inner.style.transition = 'none';
+                inner.classList.remove('is-flipped', 'phone-revealed');
+
+                if (isAuto) {
+                    autoTimer = setTimeout(() => { revealPhoneFlashcard(); }, timeFront * 1000);
+                }
+                return;
+            }
+
+            inner.style.transition = 'none';
+            inner.classList.remove('is-flipped');
+            void inner.offsetWidth;
+            inner.style.transition = 'transform 0.6s';
+
             if (isAuto) {
                 autoTimer = setTimeout(() => { flipCard(); }, timeFront * 1000);
             }
         }
 
         function flipCard() {
+            if (deviceMode === 'phone') {
+                // Không lật thẻ trên điện thoại.
+                // Lần chạm đầu tiên chỉ làm xuất hiện Pinyin + Nghĩa.
+                revealPhoneFlashcard();
+                return;
+            }
+
             const inner = document.getElementById('flashcard-inner');
             const isFlipped = inner.classList.contains('is-flipped');
-            
+
             if (!isFlipped) {
                 inner.classList.add('is-flipped');
             } else {
@@ -1635,6 +1908,24 @@
 
             if (isAuto) {
                 clearTimeout(autoTimer);
+                autoTimer = setTimeout(() => { nextFlashcard(); }, timeBack * 1000);
+            }
+        }
+
+        function revealPhoneFlashcard() {
+            if (deviceMode !== 'phone') return;
+
+            const inner = document.getElementById('flashcard-inner');
+            if (!inner || inner.classList.contains('phone-revealed')) return;
+
+            clearTimeout(autoTimer);
+            inner.classList.add('phone-revealed');
+
+            // Phát âm đúng thời điểm Pinyin + Nghĩa xuất hiện,
+            // giống thời điểm lật thẻ ở chế độ Máy tính.
+            handleCardFlipAudio();
+
+            if (isAuto) {
                 autoTimer = setTimeout(() => { nextFlashcard(); }, timeBack * 1000);
             }
         }
@@ -1662,7 +1953,7 @@
             const inner = document.getElementById('flashcard-inner');
             const hFront = document.getElementById('flash-h-front');
 
-            if (isAuto) {
+            if (isAuto && deviceMode === 'desktop') {
                 inner.classList.remove('is-flipped');
                 hFront.classList.remove('fade-in');
                 hFront.style.opacity = '0';
