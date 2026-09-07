@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tổng hợp dữ liệu</title>
+    <title>Tổng hợp dữ liệu - HSK Master</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Thư viện đọc file Excel -->
@@ -411,6 +411,17 @@
             width: 100%;
             min-height: 58px;
             padding: 12px 14px;
+        }
+
+        .option-btn.meaning-answer {
+            font-family: inherit;
+        }
+
+        /* Đáp án Hán tự trong Trắc nghiệm phải dùng đúng font Hán tự
+           giống các phần Hán tự khác của ứng dụng. */
+        .option-btn.hanzi-answer {
+            font-family: "STKaiti", "KaiTi", "Kaiti SC", "DFKai-SB", "Noto Sans SC", sans-serif !important;
+            line-height: 0.9 !important;
         }
 
         body.phone-mode .flashcard-container {
@@ -1629,10 +1640,12 @@
             const optionsDiv = document.getElementById('options');
             const manualArea = document.getElementById('manual-input-area');
             const nextBtn = document.getElementById('next-action');
+            const infoSlot2 = document.getElementById('info-slot-2');
             const userInp = document.getElementById('user-answer');
 
             qMain.className = "";
             qInfo.classList.add('hidden');
+            infoSlot2.classList.remove('hidden');
             nextBtn.classList.add('invisible');
             optionsDiv.innerHTML = '';
             manualArea.classList.add('hidden');
@@ -1666,11 +1679,18 @@
                     const btn = document.createElement('div');
                     btn.className = 'option-btn';
                     btn.style.fontSize = aFontSize + 'px';
+                    // TRẮC NGHIỆM:
+                    // Đây là phần "CÂU TRẢ LỜI CẦN CHỌN":
+                    //   Hán tự -> người học chọn NGHĨA.
+                    //   Nghĩa  -> người học chọn HÁN TỰ.
+                    // Pinyin KHÔNG hiển thị trên 4 nút lựa chọn.
                     if (currentMode === 'hz-vn') {
                         btn.innerText = choice.m;
-                    } else {
-                        btn.classList.add('chinese-font');
+                        btn.classList.add('meaning-answer');
+                    } else if (currentMode === 'vn-hz') {
                         btn.innerText = choice.h;
+                        // Câu trả lời cần chọn là Hán tự -> dùng font Hán tự.
+                        btn.classList.add('chinese-font', 'hanzi-answer');
                     }
                     btn.onclick = () => checkMultiAnswer(btn, choice);
                     optionsDiv.appendChild(btn);
@@ -1697,8 +1717,12 @@
                 }
                 const btns = document.querySelectorAll('.option-btn');
                 btns.forEach(b => {
-                    const checkTxt = currentMode === 'hz-vn' ? correctItem.m : correctItem.h;
-                    if (b.innerText === checkTxt) b.classList.add('correct');
+                    const displayedCorrectChoice =
+                        currentMode === 'hz-vn' ? correctItem.m : correctItem.h;
+
+                    if (b.innerText === displayedCorrectChoice) {
+                        b.classList.add('correct');
+                    }
                 });
             }
             showAnswerDetails();
@@ -1730,13 +1754,57 @@
             const item = quizPool[currentIndex];
             const qInfo = document.getElementById('q-info');
             const slot1 = document.getElementById('info-slot-1');
-            slot1.innerText = item.h;
-            slot1.className = "chinese-font text-color-hanzi leading-tight";
-            slot1.style.fontSize = ansFontSize + 'px';
-
             const slot2 = document.getElementById('info-slot-2');
-            slot2.innerHTML = `<span class="text-color-pinyin">${item.p}</span> <span class="mx-2 opacity-50">|</span> <span class="text-color-meaning">${item.m}</span>`;
-            slot2.style.fontSize = ansFontSize + 'px';
+
+            slot1.innerHTML = '';
+            slot2.innerHTML = '';
+            slot2.classList.remove('hidden');
+
+            /*
+             * LOGIC:
+             *
+             * TRẮC NGHIỆM
+             *   Hán tự -> CẦN CHỌN: Nghĩa
+             *              SAU KHI TRẢ LỜI: hiển thị Pinyin
+             *
+             *   Nghĩa  -> CẦN CHỌN: Hán tự
+             *              SAU KHI TRẢ LỜI: hiển thị Pinyin
+             *
+             * TỰ LUẬN
+             *   Hán tự -> CẦN GÕ: Hán tự
+             *              SAU KHI TRẢ LỜI: Pinyin + Nghĩa
+             *
+             *   Nghĩa  -> CẦN GÕ: Hán tự
+             *              SAU KHI TRẢ LỜI: Hán tự + Pinyin
+             */
+
+            if (currentFeature === 'multi') {
+                // Trắc nghiệm: sau khi trả lời mới hiển thị Pinyin.
+                slot1.innerHTML = `<span class="text-color-pinyin">${item.p}</span>`;
+                slot1.className = "leading-tight";
+                slot1.style.fontSize = ansFontSize + 'px';
+                slot2.classList.add('hidden');
+
+            } else if (currentMode === 'hz-hz') {
+                // Tự luận: Hán tự -> Gõ Hán tự -> Pinyin + Nghĩa.
+                slot1.innerHTML = `<span class="text-color-pinyin">${item.p}</span>`;
+                slot1.className = "leading-tight";
+                slot1.style.fontSize = ansFontSize + 'px';
+
+                slot2.innerHTML = `<span class="text-color-meaning">${item.m}</span>`;
+                slot2.className = "leading-tight";
+                slot2.style.fontSize = ansFontSize + 'px';
+
+            } else if (currentMode === 'vn-hz') {
+                // Tự luận: Nghĩa -> Gõ Hán tự -> Hán tự + Pinyin.
+                slot1.innerHTML = `<span class="chinese-font text-color-hanzi">${item.h}</span>`;
+                slot1.className = "chinese-font text-color-hanzi leading-tight";
+                slot1.style.fontSize = ansFontSize + 'px';
+
+                slot2.innerHTML = `<span class="text-color-pinyin">${item.p}</span>`;
+                slot2.className = "leading-tight";
+                slot2.style.fontSize = ansFontSize + 'px';
+            }
 
             qInfo.classList.remove('hidden');
             document.getElementById('next-action').classList.remove('invisible');
