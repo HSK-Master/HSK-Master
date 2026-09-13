@@ -409,8 +409,9 @@
 
         body.phone-mode .option-btn {
             width: 100%;
-            min-height: 58px;
-            padding: 12px 14px;
+            min-height: 100px !important;
+            padding: 30px 14px !important;
+            font-size: inherit;
         }
 
         .option-btn.meaning-answer {
@@ -422,6 +423,14 @@
         .option-btn.hanzi-answer {
             font-family: "STKaiti", "KaiTi", "Kaiti SC", "DFKai-SB", "Noto Sans SC", sans-serif !important;
             line-height: 0.9 !important;
+        }
+
+        /* Nút CÂU TIẾP THEO trên điện thoại: tăng chiều cao để dễ chạm. */
+        body.phone-mode #next-action .btn-next-full {
+            min-height: 100px !important;
+            padding: 18px 16px !important;
+            margin-top: 24px !important;
+            font-size: 14px !important;
         }
 
         body.phone-mode .flashcard-container {
@@ -1472,6 +1481,19 @@
                     color: ${colors.meaning} !important; 
                     font-weight: ${weights.meaning} !important; 
                 }
+
+                /* Màu đáp án trắc nghiệm phải lấy đúng màu đã cài đặt:
+                   Hán tự -> Nghĩa: dùng màu Nghĩa
+                   Nghĩa -> Hán tự: dùng màu Hán tự */
+                .option-btn.meaning-answer { 
+                    color: ${colors.meaning} !important; 
+                    font-weight: ${weights.meaning} !important;
+                }
+                .option-btn.hanzi-answer { 
+                    color: ${colors.hanzi} !important; 
+                    font-weight: ${weights.hanzi} !important;
+                }
+
                 .option-btn, #user-answer { font-weight: ${weights.hanzi}; }
             `;
             if (!document.getElementById(styleId)) document.head.appendChild(styleEl);
