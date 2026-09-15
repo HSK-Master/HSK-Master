@@ -1142,6 +1142,34 @@
         let selectedVnVoiceURI = "";
         let availableVnVoices = [];
 
+        // Trạng thái phiên/UI — chỉ tồn tại trong RAM, không lưu dữ liệu học tập trên máy.
+        let quizPool = [];
+        let wrongAnswers = [];
+        let currentIndex = 0;
+        let totalCorrect = 0;
+        let totalAttempts = 0;
+        let answered = false;
+        let currentMode = 'hz-vn';
+        let currentFeature = 'multi';
+        let currentActiveTab = 'data';
+
+        let qFontSize = 80;
+        let aFontSize = 35;
+        let ansFontSize = 35;
+        let tableFontSize = 15;
+        let roundNumber = 1;
+
+        let flashFrontSize = 135;
+        let flashBackSize = 40;
+        let isAuto = false;
+        let autoTimer = null;
+        let vnSpeechTimer = null;
+        let timeFront = 3;
+        let timeBack = 3;
+
+        let hideMeaningPinyin = false;
+        let tableSoundEnabled = true;
+
         function firebaseConfigured() {
             return FIREBASE_CONFIG &&
                 typeof FIREBASE_CONFIG.apiKey === 'string' && FIREBASE_CONFIG.apiKey.length > 0 &&
