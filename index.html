@@ -279,6 +279,36 @@
         }
 
         .bg-custom-card { background: var(--bg-card); border-color: var(--border-color); }
+
+        /* STAR YÊU THÍCH - dùng màu CSS trực tiếp để không bị dark mode/Tailwind ghi đè */
+        .favorite-star-btn {
+            color: #cbd5e1 !important;
+            -webkit-text-fill-color: #cbd5e1 !important;
+            font-size: 24px;
+            line-height: 1;
+            transition: color .15s ease, transform .15s ease, background-color .15s ease;
+            cursor: pointer;
+        }
+        .favorite-star-btn:hover { transform: scale(1.08); }
+        .favorite-star-btn.is-favorite {
+            color: #facc15 !important;
+            -webkit-text-fill-color: #facc15 !important;
+            text-shadow: 0 0 8px rgba(250, 204, 21, .35);
+        }
+        .favorite-table-btn {
+            color: #cbd5e1 !important;
+            -webkit-text-fill-color: #cbd5e1 !important;
+            font-size: 22px;
+            line-height: 1;
+            cursor: pointer;
+            transition: color .15s ease, transform .15s ease;
+        }
+        .favorite-table-btn:hover { transform: scale(1.08); }
+        .favorite-table-btn.is-favorite {
+            color: #facc15 !important;
+            -webkit-text-fill-color: #facc15 !important;
+            text-shadow: 0 0 7px rgba(250, 204, 21, .3);
+        }
         .text-custom-muted { color: var(--text-muted); }
 
         .setting-item-box {
@@ -921,7 +951,7 @@
                 </div>
 
                 <div id="question-card" class="q-card shadow-sm relative">
-                    <button id="quiz-favorite-btn" onclick="toggleCurrentFavorite()" class="absolute top-3 right-3 w-10 h-10 rounded-xl border bg-custom-card text-xl z-10" title="Thêm vào yêu thích">☆</button>
+                    <button id="quiz-favorite-btn" type="button" onclick="toggleCurrentFavorite(); return false;" class="favorite-star-btn absolute top-3 right-3 w-10 h-10 rounded-xl border bg-custom-card z-10" style="color:#cbd5e1 !important;-webkit-text-fill-color:#cbd5e1 !important;" title="Thêm vào yêu thích">☆</button>
                     <div class="q-content-left">
                         <div id="q-main-text">--</div>
                         <div id="q-info" class="q-details hidden">
@@ -1060,7 +1090,7 @@
             </div>
 
             <div id="flashcard-active" class="hidden relative">
-                <button id="flash-favorite-btn" onclick="toggleCurrentFavorite()" class="absolute top-0 right-0 w-10 h-10 rounded-xl border bg-custom-card text-xl z-10" title="Thêm vào yêu thích">☆</button>
+                <button id="flash-favorite-btn" type="button" onclick="toggleCurrentFavorite(); return false;" class="favorite-star-btn absolute top-0 right-0 w-10 h-10 rounded-xl border bg-custom-card z-10" style="color:#cbd5e1 !important;-webkit-text-fill-color:#cbd5e1 !important;" title="Thêm vào yêu thích">☆</button>
                 <p id="flash-progress" class="text-center text-[11px] font-bold text-custom-muted uppercase mb-4">THẺ 1/10</p>
                 <div class="flashcard-container" onclick="flipCard()">
                     <div class="flashcard-inner" id="flashcard-inner">
@@ -1095,7 +1125,7 @@
         // FIREBASE CLOUD SYNC
         // =========================================================
         // DÁN firebaseConfig của Firebase Web App của bạn vào đây.
-         const FIREBASE_CONFIG = {
+        const FIREBASE_CONFIG = {
     apiKey: "AIzaSyAXVYNJMY4JvWP1CtoXAcr8q1wHgFg3yP4",
     authDomain: "hsk-master-7fc94.firebaseapp.com",
     projectId: "hsk-master-7fc94",
@@ -1310,10 +1340,16 @@
                 const ref = firebase.firestore().collection('users').doc(currentUser.uid).collection('app').doc('vocabulary');
                 const snap = await ref.get();
                 if (snap.exists) {
+                    const localBefore = normalizeVocabulary(vocabulary);
                     const cloudData = normalizeVocabulary(snap.data().items || []);
-                    vocabulary = mergeVocabulary(vocabulary, cloudData);
+                    const merged = mergeVocabulary(localBefore, cloudData);
+                    const cloudKeys = new Set(cloudData.map(x => x.h));
+                    const hasLocalOnly = merged.some(x => !cloudKeys.has(x.h));
+                    vocabulary = merged;
                     localSaveVocabulary();
                     renderTable();
+                    // Nếu thiết bị này có từ cục bộ chưa có trên Cloud, đẩy phần merge lên Cloud.
+                    if (hasLocalOnly) await saveVocabularyToCloud();
                 } else if (vocabulary.length > 0) {
                     await saveVocabularyToCloud();
                 }
@@ -1780,7 +1816,7 @@
                         <input type="checkbox" class="custom-checkbox" ${item.learned ? 'checked' : ''} onchange="toggleLearned(${index})">
                     </td>
                     <td class="text-center">
-                        <button onclick="toggleFavorite(${index})" class="text-xl leading-none ${item.favorite ? 'text-yellow-400' : 'text-slate-300 dark:text-slate-600'}" title="${item.favorite ? 'Bỏ yêu thích' : 'Thêm yêu thích'}">${item.favorite ? '★' : '☆'}</button>
+                        <button type="button" onclick="toggleFavorite(${index}); return false;" class="favorite-table-btn ${item.favorite ? 'is-favorite' : ''}" style="color:${item.favorite ? '#facc15' : '#cbd5e1'} !important;-webkit-text-fill-color:${item.favorite ? '#facc15' : '#cbd5e1'} !important;" title="${item.favorite ? 'Bỏ yêu thích' : 'Thêm yêu thích'}">${item.favorite ? '★' : '☆'}</button>
                     </td>
                 `;
 
@@ -1810,22 +1846,34 @@
             if (!item) return;
             const main = vocabulary.find(v => v.h === item.h);
             if (!main) return;
-            main.favorite = !main.favorite;
-            item.favorite = main.favorite;
-            persistVocabulary();
+
+            // Đổi trạng thái yêu thích trên bản ghi gốc và item đang học.
+            const newFavoriteState = !Boolean(main.favorite);
+            main.favorite = newFavoriteState;
+            item.favorite = newFavoriteState;
+
+            // Cập nhật giao diện NGAY LẬP TỨC: ★ vàng / ☆ xám.
             updateCurrentFavoriteButtons(main);
-            renderTable();
             updateFavoriteCountHint();
+            renderTable();
+
+            // Sau khi UI đã đổi, lưu xuống localStorage + Firebase.
+            persistVocabulary();
         }
 
         function updateCurrentFavoriteButtons(item) {
+            const isFav = !!(item && item.favorite);
             const buttons = [document.getElementById('quiz-favorite-btn'), document.getElementById('flash-favorite-btn')];
             buttons.forEach(btn => {
                 if (!btn) return;
-                btn.innerText = item && item.favorite ? '★' : '☆';
-                btn.classList.toggle('text-yellow-400', !!(item && item.favorite));
-                btn.classList.toggle('text-slate-300', !(item && item.favorite));
-                btn.title = item && item.favorite ? 'Bỏ khỏi yêu thích' : 'Thêm vào yêu thích';
+                btn.innerText = isFav ? '★' : '☆';
+                btn.classList.toggle('is-favorite', isFav);
+                btn.style.setProperty('color', isFav ? '#facc15' : '#cbd5e1', 'important');
+                btn.style.setProperty('-webkit-text-fill-color', isFav ? '#facc15' : '#cbd5e1', 'important');
+                btn.style.setProperty('text-shadow', isFav ? '0 0 8px rgba(250,204,21,.35)' : 'none', 'important');
+                btn.dataset.favorite = isFav ? 'true' : 'false';
+                btn.title = isFav ? 'Bỏ khỏi yêu thích' : 'Thêm vào yêu thích';
+                btn.setAttribute('aria-label', isFav ? 'Bỏ khỏi yêu thích' : 'Thêm vào yêu thích');
             });
         }
 
