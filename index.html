@@ -695,50 +695,39 @@
         <div id="tab-data" class="space-y-4">
             <div class="bg-custom-card p-5 rounded-2xl border shadow-sm space-y-4">
                 <div>
-                    <label class="text-[11px] font-bold text-custom-muted uppercase tracking-wider mb-2 block">Nguồn dữ liệu</label>
+                    <label class="text-[11px] font-bold text-custom-muted uppercase tracking-wider mb-2 block">Quản lý dữ liệu Cloud</label>
                     <div class="grid grid-cols-2 gap-3">
-                        <label class="relative">
-                            <input type="radio" name="data-source-type" value="manual" checked class="hidden" onchange="toggleDataSourceMode()">
-                            <div class="radio-box">Nhập Data</div>
-                        </label>
-                        <label class="relative">
-                            <input type="radio" name="data-source-type" value="excel" class="hidden" onchange="toggleDataSourceMode()">
-                            <div class="radio-box">Excel</div>
-                        </label>
+                        <label class="relative"><input type="radio" name="data-source-type" value="manual" checked class="hidden" onchange="toggleDataSourceMode()"><div class="radio-box">Bổ sung từ vựng</div></label>
+                        <label class="relative"><input type="radio" name="data-source-type" value="excel" class="hidden" onchange="toggleDataSourceMode()"><div class="radio-box">File Excel gốc 2.000 từ</div></label>
                     </div>
                 </div>
 
-                <div id="input-mode-manual">
-                    <label class="text-[11px] font-bold text-custom-muted uppercase tracking-wider mb-2 block">Dán dữ liệu từ Excel (Hán tự - Pinyin - Nghĩa)</label>
-                    <textarea id="bulk-input" rows="4" class="custom-input text-sm" placeholder="Ví dụ: 你好 - nǐhǎo - Xin chào"></textarea>
+                <div id="input-mode-manual" class="space-y-2">
+                    <label class="text-[11px] font-bold text-custom-muted uppercase tracking-wider mb-2 block">Bổ sung từ vựng bằng cách dán dữ liệu</label>
+                    <textarea id="bulk-input" rows="5" class="custom-input text-sm" placeholder="Mỗi dòng: Hán tự - Pinyin - Nghĩa&#10;Ví dụ: 你好 - nǐ hǎo - Xin chào"></textarea>
+                    <p class="text-[10px] text-custom-muted italic">* Chỉ bổ sung từ mới. Từ đã có, ⭐ yêu thích và trạng thái đã học sẽ không bị ghi đè.</p>
                 </div>
 
                 <div id="input-mode-excel" class="hidden space-y-3">
-                    <div>
-                        <label class="text-[11px] font-bold text-custom-muted uppercase tracking-wider mb-2 block">Chọn File Excel (.xlsx, .xls)</label>
-                        <input type="file" id="excel-file-input" accept=".xlsx, .xls" onchange="handleExcelUpload(event)" class="custom-input text-xs">
-                        <p class="text-[10px] text-custom-muted mt-1 italic">* Cột 1: STT bài học | Cột 2: Hán tự - Nghĩa - Pinyin (ví dụ: 你好 - nǐhǎo - Xin chào)</p>
-                    </div>
-
-                    <div id="lesson-select-container" class="hidden space-y-2">
-                        <div class="flex justify-between items-center">
-                            <label class="text-[11px] font-bold text-custom-muted uppercase tracking-wider">Chọn bài học</label>
-                            <div class="flex gap-2">
-                                <button onclick="selectAllLessons(true)" class="text-[10px] text-blue-500 font-bold hover:underline">Chọn tất cả</button>
-                                <span class="text-[10px] text-custom-muted">|</span>
-                                <button onclick="selectAllLessons(false)" class="text-[10px] text-red-500 font-bold hover:underline">Bỏ chọn</button>
-                            </div>
+                    <div class="rounded-xl border p-4 bg-blue-50/50 dark:bg-blue-950/20">
+                        <div class="flex flex-wrap items-center justify-between gap-2">
+                            <div><div class="text-[11px] font-bold uppercase">File Excel gốc</div><p id="original-file-status" class="text-[10px] text-custom-muted mt-1">Đang kiểm tra Cloud...</p></div>
+                            <div class="flex gap-2"><button id="original-unlock-btn" onclick="unlockOriginalFile()" class="bg-slate-700 text-white px-3 py-2 rounded-lg text-[10px] font-bold">🔒 MỞ KHÓA</button><button id="original-delete-btn" onclick="deleteOriginalFile()" class="bg-red-500 text-white px-3 py-2 rounded-lg text-[10px] font-bold">XÓA FILE GỐC</button></div>
                         </div>
-
-                        <div id="lesson-checkbox-list" class="lesson-scroll-box grid grid-cols-2 sm:grid-cols-4 gap-1.5 text-xs font-semibold"></div>
                     </div>
+                    <div>
+                        <label class="text-[11px] font-bold text-custom-muted uppercase tracking-wider mb-2 block">Upload file Excel gốc (.xlsx, .xls)</label>
+                        <input type="file" id="excel-file-input" accept=".xlsx, .xls" onchange="handleExcelUpload(event)" class="custom-input text-xs">
+                        <p class="text-[10px] text-custom-muted mt-1 italic">* Cột 1: STT bài học | Cột 2: Hán tự - Pinyin - Nghĩa. File gốc được lưu liên tục trên Cloud.</p>
+                        <p id="original-excel-preview" class="text-[10px] text-blue-500 mt-2 font-semibold"></p>
+                    </div>
+                    <button onclick="saveOriginalExcelToCloud()" class="w-full bg-blue-600 text-white px-8 py-3 rounded-xl text-xs font-bold hover:bg-blue-700 transition-all shadow-md uppercase">LƯU FILE GỐC LÊN CLOUD</button>
+                    <p class="text-[10px] text-orange-500 italic">* Lần đầu có thể upload trực tiếp. Muốn upload lại hoặc xóa file gốc bắt buộc mở khóa bằng mật khẩu <b>113</b>.</p>
                 </div>
 
                 <div class="pt-2 flex gap-3">
-                    <button onclick="saveData()" class="bg-blue-600 text-white px-8 py-3 rounded-xl text-xs font-bold hover:bg-blue-700 transition-all shadow-md uppercase flex-1">CẬP NHẬT DANH SÁCH</button>
-                    <button onclick="showTab('quiz')" class="bg-emerald-600 text-white px-8 py-3 rounded-xl text-xs font-bold hover:bg-emerald-700 transition-all shadow-md uppercase flex-1 flex items-center justify-center gap-2">
-                        BẮT ĐẦU <i class="fa-solid fa-chevron-right text-[10px]"></i>
-                    </button>
+                    <button onclick="saveData()" class="bg-blue-600 text-white px-8 py-3 rounded-xl text-xs font-bold hover:bg-blue-700 transition-all shadow-md uppercase flex-1">BỔ SUNG VÀO CLOUD</button>
+                    <button onclick="showTab('quiz')" class="bg-emerald-600 text-white px-8 py-3 rounded-xl text-xs font-bold hover:bg-emerald-700 transition-all shadow-md uppercase flex-1 flex items-center justify-center gap-2">BẮT ĐẦU <i class="fa-solid fa-chevron-right text-[10px]"></i></button>
                 </div>
             </div>
 
@@ -1122,9 +1111,8 @@
 
     <script>
         // =========================================================
-        // FIREBASE CLOUD SYNC
+        // FIREBASE CLOUD-ONLY — KHÔNG DÙNG LOCALSTORAGE
         // =========================================================
-        // DÁN firebaseConfig của Firebase Web App của bạn vào đây.
         const FIREBASE_CONFIG = {
     apiKey: "AIzaSyAXVYNJMY4JvWP1CtoXAcr8q1wHgFg3yP4",
     authDomain: "hsk-master-7fc94.firebaseapp.com",
@@ -1135,289 +1123,342 @@
     measurementId: "G-Z6SYKZDKEL"
   };
 
-        const STORAGE_KEY = 'vocal_db_v25';
-        const COLOR_KEY = 'vocal_colors_config_v2';
-        const THEME_KEY = 'vocal_theme_preference';
-        const DEVICE_MODE_KEY = 'vocal_device_mode_preference';
-        const WEIGHT_KEY = 'vocal_weight_config';
-        const ZOOM_KEY = 'vocal_page_zoom';
-        const MUTE_KEY = 'vocal_mute_preference';
-        const ZH_VOLUME_KEY = 'vocal_zh_volume_preference';
-        const VN_VOLUME_KEY = 'vocal_vn_volume_preference';
-        const SPEECH_VN_KEY = 'vocal_speech_vn_preference';
-        const SELECTED_VN_VOICE_KEY = 'vocal_selected_vn_voice';
+        // Mật khẩu chỉ dùng để khóa thao tác quản trị file gốc trong giao diện.
+        // Bảo mật thật sự vẫn phải được kiểm soát bằng Firebase Authentication + Firestore Rules.
+        const ORIGINAL_FILE_PASSWORD = '113';
 
-        let vocabulary = safeJsonParse(localStorage.getItem(STORAGE_KEY), []);
+        let vocabulary = [];
         let currentUser = null;
         let firestoreReady = false;
-        let cloudSyncTimer = null;
         let isCloudLoading = false;
-        let lastCloudWriteAt = 0;
         let unsubscribeVocabulary = null;
-        let colors = JSON.parse(localStorage.getItem(COLOR_KEY)) || { hanzi: '#ef4444', pinyin: '#22c55e', meaning: '#3b82f6' };
-        let weights = JSON.parse(localStorage.getItem(WEIGHT_KEY)) || { hanzi: 450, pinyin: 400, meaning: 400 };
-        let pageZoom = localStorage.getItem(ZOOM_KEY) || 135;
-        let deviceMode = localStorage.getItem(DEVICE_MODE_KEY) || 'desktop';
-        let isMuted = localStorage.getItem(MUTE_KEY) === 'true';
-        let zhVolume = localStorage.getItem(ZH_VOLUME_KEY) !== null ? localStorage.getItem(ZH_VOLUME_KEY) : 100;
-        let vnVolume = localStorage.getItem(VN_VOLUME_KEY) !== null ? localStorage.getItem(VN_VOLUME_KEY) : 50;
-        let isVnSpeechEnabled = localStorage.getItem(SPEECH_VN_KEY) === 'true';
-        let selectedVnVoiceURI = localStorage.getItem(SELECTED_VN_VOICE_KEY) || "";
-
-        let availableVnVoices = [];
+        let originalFileExists = false;
+        let originalFileUnlocked = false;
         let excelDataByLesson = {};
+        let pendingOriginalExcel = null;
 
-        let quizPool = [];
-        let wrongAnswers = [];
-        let currentIndex = 0;
-        let totalCorrect = 0;
-        let totalAttempts = 0;
-        let answered = false;
-        let currentMode = 'hz-vn';
-        let currentFeature = 'multi';
-        let currentActiveTab = 'data';
-        
-        let qFontSize = 80;
-        let aFontSize = 35;
-        let ansFontSize = 35;
-        let tableFontSize = 15;
-        let roundNumber = 1;
-
-        let flashFrontSize = 135;
-        let flashBackSize = 40;
-        let isAuto = false;
-        let autoTimer = null;
-        let vnSpeechTimer = null;
-        let timeFront = 3;
-        let timeBack = 3;
-        
-        let hideMeaningPinyin = false;
-        let tableSoundEnabled = true;
-
-        window.onload = async () => {
-            initTheme();
-            initDeviceMode();
-            initColors();
-            initZoom();
-            initAudioSettings();
-            applyColorStyles();
-            renderTable();
-            loadAvailableVoices();
-            updateQFontSize(100);
-            updateAFontSize(40);
-            updateAnsFontSize(40);
-            updateQuestionSourceUI();
-            updateFavoriteCountHint();
-
-            const userInput = document.getElementById('user-answer');
-            userInput.addEventListener('keydown', function(e) {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    if (!answered) checkManualAnswer();
-                    else nextQuestion();
-                } else if (e.key === ' ' && answered) {
-                    e.preventDefault();
-                    nextQuestion();
-                }
-            });
-
-            await initFirebaseCloud();
-        };
-
-        function safeJsonParse(value, fallback) {
-            try { return value ? JSON.parse(value) : fallback; }
-            catch (e) { return fallback; }
-        }
+        // Các thiết lập giao diện chỉ là trạng thái phiên hiện tại; không lưu local.
+        let colors = { hanzi: '#ef4444', pinyin: '#22c55e', meaning: '#3b82f6' };
+        let weights = { hanzi: 450, pinyin: 400, meaning: 400 };
+        let pageZoom = 135;
+        let deviceMode = 'desktop';
+        let isMuted = false;
+        let zhVolume = 100;
+        let vnVolume = 50;
+        let isVnSpeechEnabled = false;
+        let selectedVnVoiceURI = "";
+        let availableVnVoices = [];
 
         function firebaseConfigured() {
             return FIREBASE_CONFIG &&
-                FIREBASE_CONFIG.apiKey && !FIREBASE_CONFIG.apiKey.startsWith('YOUR_') &&
-                FIREBASE_CONFIG.projectId && !FIREBASE_CONFIG.projectId.startsWith('YOUR_');
+                typeof FIREBASE_CONFIG.apiKey === 'string' && FIREBASE_CONFIG.apiKey.length > 0 &&
+                typeof FIREBASE_CONFIG.projectId === 'string' && FIREBASE_CONFIG.projectId.length > 0;
         }
 
-        async function initFirebaseCloud() {
-            const status = document.getElementById('sync-status');
-            if (!firebaseConfigured()) {
-                status.innerText = 'Chưa cấu hình Cloud';
-                status.className = 'text-[9px] font-bold text-orange-500 uppercase';
-                document.getElementById('btn-google-login').classList.remove('hidden');
-                document.getElementById('btn-google-login').disabled = true;
-                return;
+        function getVocabularyCollection() {
+            if (!currentUser || !firestoreReady) return null;
+            return firebase.firestore().collection('users').doc(currentUser.uid).collection('vocabulary');
+        }
+
+        function getAppMetaRef() {
+            if (!currentUser || !firestoreReady) return null;
+            return firebase.firestore().collection('users').doc(currentUser.uid).collection('app').doc('metadata');
+        }
+
+        function wordDocId(hanzi) {
+            let hash = 2166136261;
+            const s = String(hanzi || '').trim();
+            for (let i = 0; i < s.length; i++) {
+                hash ^= s.charCodeAt(i);
+                hash += (hash << 1) + (hash << 4) + (hash << 7) + (hash << 8) + (hash << 24);
             }
+            return 'w_' + (hash >>> 0).toString(36);
+        }
 
-            try {
-                if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
-                const auth = firebase.auth();
-                firebase.firestore();
-                firestoreReady = true;
-                status.innerText = 'Đang xác thực...';
+        function normalizeVocabulary(items) {
+            return (Array.isArray(items) ? items : []).filter(x => x && String(x.h || '').trim()).map(x => ({
+                h: String(x.h || '').trim(),
+                p: String(x.p || '').trim(),
+                m: String(x.m || '').trim(),
+                lesson: x.lesson !== undefined ? String(x.lesson || '').trim() : '',
+                learned: !!x.learned,
+                favorite: !!x.favorite,
+                showDetail: !!x.showDetail,
+                isOriginal: !!x.isOriginal
+            }));
+        }
 
-                auth.onAuthStateChanged(async (user) => {
-                    currentUser = user || null;
-                    updateAuthUI();
-                    if (user) {
-                        await loadCloudVocabulary();
-                        startRealtimeVocabularySync();
-                    } else {
-                        stopRealtimeVocabularySync();
-                        status.innerText = 'Chưa đăng nhập';
-                        status.className = 'text-[9px] font-bold text-orange-500 uppercase';
-                    }
-                });
+        function vocabFromDoc(doc) {
+            const d = doc.data() || {};
+            return normalizeVocabulary([d])[0];
+        }
 
-                await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
-            } catch (error) {
-                console.error('Firebase init error:', error);
-                status.innerText = 'Cloud lỗi';
-                status.className = 'text-[9px] font-bold text-red-500 uppercase';
-            }
+        function setCloudStatus(text, type = 'muted') {
+            const el = document.getElementById('sync-status');
+            if (!el) return;
+            const cls = { muted:'text-[9px] font-bold text-custom-muted uppercase', blue:'text-[9px] font-bold text-blue-500 uppercase', green:'text-[9px] font-bold text-emerald-500 uppercase', orange:'text-[9px] font-bold text-orange-500 uppercase', red:'text-[9px] font-bold text-red-500 uppercase' };
+            el.className = cls[type] || cls.muted;
+            el.innerText = text;
         }
 
         function updateAuthUI() {
             const login = document.getElementById('btn-google-login');
             const logout = document.getElementById('btn-google-logout');
-            const status = document.getElementById('sync-status');
             if (!login || !logout) return;
             if (currentUser) {
                 login.classList.add('hidden');
                 logout.classList.remove('hidden');
-                status.innerText = '☁ ' + (currentUser.email || 'Đã đồng bộ');
-                status.className = 'text-[9px] font-bold text-emerald-500 uppercase max-w-[150px] truncate';
+                setCloudStatus('☁ ' + (currentUser.email || 'Đã đăng nhập'), 'green');
             } else {
                 login.classList.remove('hidden');
                 logout.classList.add('hidden');
             }
         }
 
+        async function initFirebaseCloud() {
+            const login = document.getElementById('btn-google-login');
+            if (!firebaseConfigured()) {
+                setCloudStatus('Chưa cấu hình Cloud', 'orange');
+                if (login) { login.classList.remove('hidden'); login.disabled = true; login.title = 'Chưa cấu hình Firebase'; }
+                return;
+            }
+            try {
+                if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
+                const auth = firebase.auth();
+                firebase.firestore();
+                firestoreReady = true;
+                await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+                setCloudStatus('Đang xác thực...', 'blue');
+                auth.onAuthStateChanged(async user => {
+                    currentUser = user || null;
+                    updateAuthUI();
+                    if (user) {
+                        originalFileUnlocked = false;
+                        await loadCloudVocabulary();
+                        await loadOriginalFileMeta();
+                        startRealtimeVocabularySync();
+                    } else {
+                        stopRealtimeVocabularySync();
+                        vocabulary = [];
+                        originalFileExists = false;
+                        originalFileUnlocked = false;
+                        renderTable(); updateFavoriteCountHint(); updateOriginalFileUI();
+                        setCloudStatus('Chưa đăng nhập', 'orange');
+                    }
+                });
+            } catch (error) {
+                console.error('Firebase init error:', error);
+                firestoreReady = false;
+                setCloudStatus('Cloud lỗi', 'red');
+            }
+        }
+
         async function signInWithGoogle() {
             if (!firestoreReady) { alert('Bạn chưa cấu hình Firebase trong code.'); return; }
-            try {
-                const provider = new firebase.auth.GoogleAuthProvider();
-                await firebase.auth().signInWithPopup(provider);
-            } catch (error) {
-                console.error(error);
-                alert('Đăng nhập Google thất bại: ' + (error.message || error.code));
-            }
+            try { await firebase.auth().signInWithPopup(new firebase.auth.GoogleAuthProvider()); }
+            catch (error) { console.error(error); alert('Đăng nhập Google thất bại: ' + (error.message || error.code)); }
         }
 
         async function signOutGoogle() {
             if (!confirm('Đăng xuất tài khoản Google trên thiết bị này?')) return;
-            await firebase.auth().signOut();
-        }
-
-        function localSaveVocabulary() {
-            persistVocabulary();
-        }
-
-        function normalizeVocabulary(items) {
-            return (Array.isArray(items) ? items : []).filter(x => x && x.h).map(x => ({
-                h: String(x.h || '').trim(),
-                p: String(x.p || '').trim(),
-                m: String(x.m || '').trim(),
-                learned: !!x.learned,
-                favorite: !!x.favorite,
-                showDetail: !!x.showDetail
-            }));
-        }
-
-        function mergeVocabulary(localItems, cloudItems) {
-            const map = new Map();
-            normalizeVocabulary(localItems).forEach(x => map.set(x.h, x));
-            normalizeVocabulary(cloudItems).forEach(x => {
-                const old = map.get(x.h);
-                // Cloud is authoritative for existing words; local-only words are retained.
-                map.set(x.h, old ? { ...x, learned: x.learned, favorite: x.favorite, showDetail: x.showDetail || old.showDetail } : x);
-            });
-            return Array.from(map.values());
+            try { await firebase.auth().signOut(); } catch (error) { console.error(error); }
         }
 
         async function loadCloudVocabulary() {
-            if (!currentUser || !firestoreReady) return;
+            const col = getVocabularyCollection();
+            if (!col) return;
             isCloudLoading = true;
-            const status = document.getElementById('sync-status');
-            status.innerText = '☁ Đang tải...';
+            setCloudStatus('☁ Đang tải dữ liệu...', 'blue');
             try {
-                const ref = firebase.firestore().collection('users').doc(currentUser.uid).collection('app').doc('vocabulary');
-                const snap = await ref.get();
-                if (snap.exists) {
-                    const localBefore = normalizeVocabulary(vocabulary);
-                    const cloudData = normalizeVocabulary(snap.data().items || []);
-                    const merged = mergeVocabulary(localBefore, cloudData);
-                    const cloudKeys = new Set(cloudData.map(x => x.h));
-                    const hasLocalOnly = merged.some(x => !cloudKeys.has(x.h));
-                    vocabulary = merged;
-                    localSaveVocabulary();
-                    renderTable();
-                    // Nếu thiết bị này có từ cục bộ chưa có trên Cloud, đẩy phần merge lên Cloud.
-                    if (hasLocalOnly) await saveVocabularyToCloud();
-                } else if (vocabulary.length > 0) {
-                    await saveVocabularyToCloud();
-                }
-                status.innerText = '☁ ' + (currentUser.email || 'Đã đồng bộ');
-                status.className = 'text-[9px] font-bold text-emerald-500 uppercase max-w-[150px] truncate';
+                const snap = await col.get();
+                vocabulary = snap.docs.map(vocabFromDoc).filter(Boolean).sort((a,b) => a.h.localeCompare(b.h));
+                renderTable(); updateFavoriteCountHint(); updateOriginalFileUI();
+                setCloudStatus('☁ Đã đồng bộ', 'green');
             } catch (error) {
                 console.error('Cloud load error:', error);
-                status.innerText = 'Offline';
-                status.className = 'text-[9px] font-bold text-orange-500 uppercase';
-            } finally {
-                isCloudLoading = false;
-            }
+                setCloudStatus('⚠ Không tải được Cloud', 'red');
+                alert('Không thể tải dữ liệu từ Cloud. Kiểm tra Firestore Rules và kết nối mạng.');
+            } finally { isCloudLoading = false; }
         }
 
         function startRealtimeVocabularySync() {
             stopRealtimeVocabularySync();
-            if (!currentUser || !firestoreReady) return;
-            const ref = firebase.firestore().collection('users').doc(currentUser.uid).collection('app').doc('vocabulary');
-            unsubscribeVocabulary = ref.onSnapshot((snap) => {
-                if (!snap.exists || isCloudLoading) return;
-                const incoming = normalizeVocabulary(snap.data().items || []);
-                if (!incoming.length && vocabulary.length) return;
-                vocabulary = incoming;
-                localSaveVocabulary();
-                renderTable();
-                updateFavoriteCountHint();
-                if (quizPool[currentIndex]) updateCurrentFavoriteButtons(vocabulary.find(v => v.h === quizPool[currentIndex].h));
-                const status = document.getElementById('sync-status');
-                if (status && currentUser) {
-                    status.innerText = '☁ Đã đồng bộ';
-                    status.className = 'text-[9px] font-bold text-emerald-500 uppercase';
+            const col = getVocabularyCollection();
+            if (!col) return;
+            unsubscribeVocabulary = col.onSnapshot(snap => {
+                if (isCloudLoading) return;
+                vocabulary = snap.docs.map(vocabFromDoc).filter(Boolean).sort((a,b) => a.h.localeCompare(b.h));
+                renderTable(); updateFavoriteCountHint(); updateOriginalFileUI();
+                if (quizPool[currentIndex]) {
+                    const fresh = vocabulary.find(v => v.h === quizPool[currentIndex].h);
+                    if (fresh) { quizPool[currentIndex] = { ...quizPool[currentIndex], ...fresh }; updateCurrentFavoriteButtons(fresh); }
                 }
-            }, (error) => {
-                console.error('Realtime sync error:', error);
-            });
+                if (currentUser) setCloudStatus('☁ Đã đồng bộ', 'green');
+            }, error => { console.error('Realtime sync error:', error); setCloudStatus('⚠ Mất kết nối Cloud', 'red'); });
         }
 
         function stopRealtimeVocabularySync() {
-            if (typeof unsubscribeVocabulary === 'function') {
-                unsubscribeVocabulary();
-                unsubscribeVocabulary = null;
-            }
+            if (typeof unsubscribeVocabulary === 'function') unsubscribeVocabulary();
+            unsubscribeVocabulary = null;
         }
 
-        async function saveVocabularyToCloud() {
-            if (!currentUser || !firestoreReady || isCloudLoading) return;
-            try {
-                const clean = normalizeVocabulary(vocabulary);
-                await firebase.firestore().collection('users').doc(currentUser.uid).collection('app').doc('vocabulary').set({
-                    items: clean,
-                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        async function writeBatchChunks(operations) {
+            if (!currentUser || !firestoreReady) throw new Error('Chưa đăng nhập Cloud.');
+            const db = firebase.firestore();
+            for (let i = 0; i < operations.length; i += 450) {
+                const batch = db.batch();
+                operations.slice(i, i + 450).forEach(op => {
+                    if (op.type === 'set') batch.set(op.ref, op.data, op.options || {});
+                    else if (op.type === 'update') batch.update(op.ref, op.data);
+                    else batch.delete(op.ref);
                 });
-                lastCloudWriteAt = Date.now();
-                const status = document.getElementById('sync-status');
-                status.innerText = '☁ Đã đồng bộ';
-                status.className = 'text-[9px] font-bold text-emerald-500 uppercase';
-            } catch (error) {
-                console.error('Cloud save error:', error);
-                const status = document.getElementById('sync-status');
-                status.innerText = '⚠ Lưu Cloud lỗi';
-                status.className = 'text-[9px] font-bold text-red-500 uppercase';
+                await batch.commit();
             }
         }
 
-        function persistVocabulary() {
-            localSaveVocabulary();
-            clearTimeout(cloudSyncTimer);
-            cloudSyncTimer = setTimeout(saveVocabularyToCloud, 250);
+        async function persistVocabularyItem(item) {
+            if (!item || !currentUser || !firestoreReady) { alert('Bạn cần đăng nhập Google để lưu dữ liệu.'); return false; }
+            try {
+                await getVocabularyCollection().doc(wordDocId(item.h)).set({
+                    h:item.h, p:item.p||'', m:item.m||'', lesson:item.lesson||'',
+                    learned:!!item.learned, favorite:!!item.favorite, showDetail:!!item.showDetail,
+                    isOriginal:!!item.isOriginal, updatedAt:firebase.firestore.FieldValue.serverTimestamp()
+                }, {merge:true});
+                return true;
+            } catch(error) { console.error(error); setCloudStatus('⚠ Lưu Cloud lỗi','red'); alert('Không thể lưu thay đổi lên Cloud: ' + (error.message || error)); return false; }
+        }
+
+        function parseVocabString(textStr) {
+            if (!textStr) return null;
+            const parts = textStr.includes('\t') ? textStr.split('\t') : textStr.split(' - ');
+            if (parts.length < 2) return null;
+            const h = parts[0]?.trim() || '';
+            let p = '', m = '';
+            const hasTone = str => /[āáǎàēéěèīíǐìōóǒòūúǔùǖǘǚǜ]/i.test(str);
+            if (parts.length >= 3) {
+                if (hasTone(parts[1])) { p=parts[1].trim(); m=parts[2].trim(); }
+                else if (hasTone(parts[2])) { m=parts[1].trim(); p=parts[2].trim(); }
+                else { p=parts[1].trim(); m=parts[2].trim(); }
+            } else if (hasTone(parts[1])) p=parts[1].trim(); else m=parts[1].trim();
+            return {h,p,m,learned:false,favorite:false,showDetail:false,isOriginal:false};
+        }
+
+        async function saveSupplementVocabulary() {
+            if (!currentUser || !firestoreReady) { alert('Hãy đăng nhập Google trước khi bổ sung từ vựng.'); return; }
+            const input = document.getElementById('bulk-input').value.trim();
+            if (!input) { alert('Hãy dán dữ liệu cần bổ sung.'); return; }
+            const parsed = input.split('\n').map(parseVocabString).filter(x => x && x.h);
+            const existing = new Map(vocabulary.map(v => [v.h,v]));
+            const seen = new Set(), uniqueNew = [], duplicates = [];
+            parsed.forEach(item => { if (seen.has(item.h)||existing.has(item.h)) duplicates.push(item.h); else { seen.add(item.h); uniqueNew.push(item); } });
+            if (!uniqueNew.length) { alert(`Không có từ mới để bổ sung. ${duplicates.length} từ đã tồn tại/trùng.`); return; }
+            setCloudStatus('☁ Đang bổ sung từ...', 'blue');
+            try {
+                const col=getVocabularyCollection();
+                await writeBatchChunks(uniqueNew.map(item=>({type:'set',ref:col.doc(wordDocId(item.h)),data:{h:item.h,p:item.p||'',m:item.m||'',lesson:'',learned:false,favorite:false,showDetail:false,isOriginal:false,createdAt:firebase.firestore.FieldValue.serverTimestamp(),updatedAt:firebase.firestore.FieldValue.serverTimestamp()}})));
+                document.getElementById('bulk-input').value='';
+                setCloudStatus('☁ Đã đồng bộ','green');
+                alert(`Đã bổ sung ${uniqueNew.length} từ mới lên Cloud.` + (duplicates.length ? `\nBỏ qua ${duplicates.length} từ đã tồn tại/trùng.` : ''));
+            } catch(error) { console.error(error); setCloudStatus('⚠ Bổ sung lỗi','red'); alert('Bổ sung từ vựng thất bại: ' + (error.message || error)); }
+        }
+
+        async function loadOriginalFileMeta() {
+            const ref=getAppMetaRef(); if(!ref) return;
+            try {
+                const snap=await ref.get(); const data=snap.exists ? snap.data()||{} : {};
+                originalFileExists=!!data.originalFile;
+                updateOriginalFileUI(data.originalFile||null);
+            } catch(error) { console.error(error); originalFileExists=false; updateOriginalFileUI(); }
+        }
+
+        function updateOriginalFileUI(meta=null) {
+            const status=document.getElementById('original-file-status'), unlock=document.getElementById('original-unlock-btn'), input=document.getElementById('excel-file-input'), del=document.getElementById('original-delete-btn');
+            if(!status) return;
+            if(!currentUser) { status.innerText='Đăng nhập Google để quản lý file gốc trên Cloud.'; if(input)input.disabled=true;if(unlock)unlock.disabled=true;if(del)del.disabled=true;return; }
+            if(originalFileExists) {
+                const count=meta?.count ?? vocabulary.filter(v=>v.isOriginal).length;
+                status.innerText=`☁ File gốc đang lưu: ${count} từ${meta?.name ? ' — '+meta.name : ''}`;
+                if(unlock){unlock.disabled=false;unlock.innerText=originalFileUnlocked?'ĐÃ MỞ KHÓA':'🔒 MỞ KHÓA (mật khẩu 113)';}
+                if(input)input.disabled=!originalFileUnlocked;if(del)del.disabled=!originalFileUnlocked;
+            } else {
+                status.innerText='Chưa có file gốc. Có thể upload file 2.000 từ đầu tiên.';
+                if(unlock){unlock.disabled=true;unlock.innerText='🔒 MỞ KHÓA';} if(input)input.disabled=false;if(del)del.disabled=true;
+            }
+        }
+
+        function unlockOriginalFile() {
+            if(!currentUser){alert('Hãy đăng nhập Google trước.');return;}
+            const password=prompt('Nhập mật khẩu để upload lại hoặc xóa file gốc:');
+            if(password===null)return;
+            if(password===ORIGINAL_FILE_PASSWORD){originalFileUnlocked=true;updateOriginalFileUI();alert('Đã mở khóa quản lý file gốc.');}
+            else {originalFileUnlocked=false;updateOriginalFileUI();alert('Mật khẩu không đúng.');}
+        }
+
+        function toggleDataSourceMode() {
+            const type=document.querySelector('input[name="data-source-type"]:checked')?.value||'manual';
+            document.getElementById('input-mode-manual').classList.toggle('hidden',type!=='manual');
+            document.getElementById('input-mode-excel').classList.toggle('hidden',type!=='excel');
+            if(type==='excel')updateOriginalFileUI();
+        }
+
+        function handleExcelUpload(event) {
+            const file=event.target.files[0]; if(!file)return;
+            if(!currentUser){alert('Hãy đăng nhập Google trước.');event.target.value='';return;}
+            if(originalFileExists&&!originalFileUnlocked){alert('File gốc đã tồn tại. Phải mở khóa bằng mật khẩu 113 trước khi upload lại.');event.target.value='';return;}
+            const reader=new FileReader();
+            reader.onload=function(e){
+                try{
+                    const wb=XLSX.read(new Uint8Array(e.target.result),{type:'array'}), sheet=wb.Sheets[wb.SheetNames[0]], rows=XLSX.utils.sheet_to_json(sheet,{header:1});
+                    const items=[]; excelDataByLesson={};
+                    rows.forEach(row=>{if(!row||row.length<2)return;const lesson=String(row[0]??'').trim();const item=parseVocabString(String(row[1]??'').trim());if(item&&item.h){item.lesson=lesson;item.isOriginal=true;items.push(item);if(lesson){(excelDataByLesson[lesson] ||= []).push(item);}}});
+                    if(!items.length){alert('Không tìm thấy dữ liệu từ vựng hợp lệ trong file Excel.');event.target.value='';return;}
+                    pendingOriginalExcel={fileName:file.name,items};
+                    const unique=new Set(items.map(x=>x.h)).size;
+                    document.getElementById('original-excel-preview').innerText=`Đã đọc ${items.length} dòng hợp lệ, ${unique} từ Hán tự duy nhất. Bấm "LƯU FILE GỐC LÊN CLOUD".`;
+                }catch(error){console.error(error);alert('Không đọc được file Excel: '+(error.message||error));event.target.value='';}
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        async function saveOriginalExcelToCloud() {
+            if(!currentUser||!firestoreReady){alert('Hãy đăng nhập Google trước.');return;}
+            if(!pendingOriginalExcel?.items?.length){alert('Hãy chọn file Excel gốc trước.');return;}
+            if(originalFileExists&&!originalFileUnlocked){alert('Phải mở khóa bằng mật khẩu 113 trước.');return;}
+            const map=new Map(); pendingOriginalExcel.items.forEach(x=>{if(!map.has(x.h))map.set(x.h,x);});
+            const items=[...map.values()];
+            if(originalFileExists&&!confirm(`Thay thế file gốc hiện tại bằng "${pendingOriginalExcel.fileName}" (${items.length} từ)? Các trạng thái ⭐ và đã học của từ trùng sẽ được giữ lại.`))return;
+            setCloudStatus('☁ Đang lưu file gốc...','blue');
+            try{
+                const col=getVocabularyCollection(), currentOriginals=vocabulary.filter(v=>v.isOriginal), newKeys=new Set(items.map(x=>x.h)), existing=new Map(vocabulary.map(v=>[v.h,v]));
+                const deletes=currentOriginals.filter(v=>!newKeys.has(v.h)).map(v=>({type:'delete',ref:col.doc(wordDocId(v.h))}));
+                const sets=items.map(x=>{const old=existing.get(x.h);const data={h:x.h,p:x.p||'',m:x.m||'',lesson:x.lesson||'',learned:old?!!old.learned:false,favorite:old?!!old.favorite:false,showDetail:old?!!old.showDetail:false,isOriginal:true,updatedAt:firebase.firestore.FieldValue.serverTimestamp()};if(!old)data.createdAt=firebase.firestore.FieldValue.serverTimestamp();return {type:'set',ref:col.doc(wordDocId(x.h)),data,options:{merge:true}};});
+                await writeBatchChunks([...deletes,...sets]);
+                await getAppMetaRef().set({originalFile:{name:pendingOriginalExcel.fileName,count:items.length,uploadedAt:firebase.firestore.FieldValue.serverTimestamp(),version:1}},{merge:true});
+                pendingOriginalExcel=null;document.getElementById('excel-file-input').value='';document.getElementById('original-excel-preview').innerText='Đã lưu file gốc lên Cloud.';originalFileExists=true;originalFileUnlocked=false;
+                await loadCloudVocabulary();await loadOriginalFileMeta();setCloudStatus('☁ File gốc đã lưu','green');
+                alert(`Đã lưu ${items.length} từ của file gốc. ⭐ và trạng thái đã học của từ trùng được giữ lại.`);
+            }catch(error){console.error(error);setCloudStatus('⚠ Lưu file gốc lỗi','red');alert('Không thể lưu file gốc: '+(error.message||error));}
+        }
+
+        async function deleteOriginalFile() {
+            if(!currentUser||!firestoreReady){alert('Hãy đăng nhập Google trước.');return;}
+            if(!originalFileExists){alert('Hiện không có file gốc.');return;}
+            if(!originalFileUnlocked){alert('Phải mở khóa bằng mật khẩu 113 trước khi xóa.');return;}
+            const originals=vocabulary.filter(v=>v.isOriginal), count=originals.length;
+            if(!confirm(`XÓA FILE GỐC và ${count} từ thuộc file gốc khỏi Cloud?\n\nCác từ bổ sung sẽ được giữ lại. Thao tác này không thể hoàn tác.`))return;
+            setCloudStatus('☁ Đang xóa file gốc...','blue');
+            try{
+                const col=getVocabularyCollection();
+                await writeBatchChunks(originals.map(v=>({type:'delete',ref:col.doc(wordDocId(v.h))})));
+                await getAppMetaRef().set({originalFile:firebase.firestore.FieldValue.delete()},{merge:true});
+                originalFileExists=false;originalFileUnlocked=false;pendingOriginalExcel=null;updateOriginalFileUI();await loadCloudVocabulary();setCloudStatus('☁ Đã xóa file gốc','green');
+                alert(`Đã xóa file gốc và ${count} từ thuộc file gốc. Từ bổ sung vẫn được giữ.`);
+            }catch(error){console.error(error);setCloudStatus('⚠ Xóa file gốc lỗi','red');alert('Không thể xóa file gốc: '+(error.message||error));}
+        }
+
+        async function saveData() {
+            const type=document.querySelector('input[name="data-source-type"]:checked')?.value||'manual';
+            if(type==='manual') await saveSupplementVocabulary(); else await saveOriginalExcelToCloud();
         }
 
         function loadAvailableVoices() {
@@ -1450,148 +1491,6 @@
 
         function changeVnVoice(voiceURI) {
             selectedVnVoiceURI = voiceURI;
-            localStorage.setItem(SELECTED_VN_VOICE_KEY, voiceURI);
-        }
-
-        function toggleDataSourceMode() {
-            const sourceType = document.querySelector('input[name="data-source-type"]:checked').value;
-            if (sourceType === 'manual') {
-                document.getElementById('input-mode-manual').classList.remove('hidden');
-                document.getElementById('input-mode-excel').classList.add('hidden');
-            } else {
-                document.getElementById('input-mode-manual').classList.add('hidden');
-                document.getElementById('input-mode-excel').classList.remove('hidden');
-            }
-        }
-
-        function parseVocabString(textStr) {
-            if (!textStr) return null;
-            const parts = textStr.includes('\t') ? textStr.split('\t') : textStr.split(' - ');
-            if (parts.length < 2) return null;
-
-            let h = parts[0]?.trim() || '';
-            let p = '';
-            let m = '';
-
-            const hasPinyinTone = (str) => /[āáǎàēéěèīíǐìōóǒòūúǔùǖǘǚǜ]/i.test(str);
-
-            if (parts.length >= 3) {
-                if (hasPinyinTone(parts[1])) {
-                    p = parts[1].trim();
-                    m = parts[2].trim();
-                } else if (hasPinyinTone(parts[2])) {
-                    m = parts[1].trim();
-                    p = parts[2].trim();
-                } else {
-                    p = parts[1].trim();
-                    m = parts[2].trim();
-                }
-            } else if (parts.length === 2) {
-                if (hasPinyinTone(parts[1])) {
-                    p = parts[1].trim();
-                } else {
-                    m = parts[1].trim();
-                }
-            }
-
-            return { h, p, m, learned: false, favorite: false, showDetail: false };
-        }
-
-        function handleExcelUpload(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const data = new Uint8Array(e.target.result);
-                const workbook = XLSX.read(data, { type: 'array' });
-                const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-                const rows = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
-
-                excelDataByLesson = {};
-
-                rows.forEach(row => {
-                    if (row && row.length >= 2) {
-                        const lessonNo = String(row[0]).trim();
-                        const content = String(row[1]).trim();
-                        const parsed = parseVocabString(content);
-
-                        if (lessonNo && parsed && parsed.h) {
-                            if (!excelDataByLesson[lessonNo]) {
-                                excelDataByLesson[lessonNo] = [];
-                            }
-                            excelDataByLesson[lessonNo].push(parsed);
-                        }
-                    }
-                });
-
-                const availableLessons = Object.keys(excelDataByLesson).sort((a, b) => {
-                    return (parseFloat(a) || 0) - (parseFloat(b) || 0);
-                });
-
-                if (availableLessons.length > 0) {
-                    renderLessonCheckboxes(availableLessons);
-                    document.getElementById('lesson-select-container').classList.remove('hidden');
-                } else {
-                    alert("Không tìm thấy dữ liệu bài học hợp lệ trong file Excel!");
-                }
-            };
-            reader.readAsArrayBuffer(file);
-        }
-
-        function renderLessonCheckboxes(lessons) {
-            const container = document.getElementById('lesson-checkbox-list');
-            container.innerHTML = '';
-
-            lessons.forEach(lesson => {
-                const label = document.createElement('label');
-                label.className = 'flex items-center gap-1.5 p-1 rounded cursor-pointer hover:bg-blue-500/10 transition-all';
-                label.innerHTML = `
-                    <input type="checkbox" class="lesson-checkbox custom-checkbox" value="${lesson}" checked>
-                    <span class="truncate"> ${lesson} (${excelDataByLesson[lesson].length} từ)</span>
-                `;
-                container.appendChild(label);
-            });
-        }
-
-        function selectAllLessons(checked) {
-            const checkboxes = document.querySelectorAll('.lesson-checkbox');
-            checkboxes.forEach(cb => cb.checked = checked);
-        }
-
-        function saveData() {
-            const sourceType = document.querySelector('input[name="data-source-type"]:checked').value;
-            let newVocab = [];
-
-            if (sourceType === 'manual') {
-                const input = document.getElementById('bulk-input').value.trim();
-                if (!input) { alert("Hãy dán dữ liệu!"); return; }
-                const rows = input.split('\n');
-                newVocab = rows.map(row => parseVocabString(row)).filter(item => item && item.h);
-                document.getElementById('bulk-input').value = '';
-            } else {
-                const checkedBoxes = document.querySelectorAll('.lesson-checkbox:checked');
-                if (checkedBoxes.length === 0) {
-                    alert("Hãy chọn ít nhất 1 bài học!");
-                    return;
-                }
-
-                checkedBoxes.forEach(cb => {
-                    const lNum = cb.value;
-                    if (excelDataByLesson[lNum]) {
-                        newVocab = newVocab.concat(excelDataByLesson[lNum]);
-                    }
-                });
-            }
-
-            const oldMap = new Map(vocabulary.map(item => [item.h, item]));
-            vocabulary = newVocab.map(item => {
-                const old = oldMap.get(item.h);
-                return { ...item, learned: old ? !!old.learned : false, favorite: old ? !!old.favorite : false, showDetail: old ? !!old.showDetail : false };
-            });
-            persistVocabulary();
-            renderTable();
-            alert(`Đã cập nhật ${newVocab.length} từ vựng!`);
         }
 
         function initAudioSettings() {
@@ -1612,18 +1511,15 @@
         function updateZhVolume(val) {
             zhVolume = val;
             document.getElementById('zh-volume-val').innerText = val + '%';
-            localStorage.setItem(ZH_VOLUME_KEY, val);
         }
 
         function updateVnVolume(val) {
             vnVolume = val;
             document.getElementById('vn-volume-val').innerText = val + '%';
-            localStorage.setItem(VN_VOLUME_KEY, val);
         }
 
         function toggleMute() {
             isMuted = !isMuted;
-            localStorage.setItem(MUTE_KEY, isMuted);
             updateMuteUI();
         }
 
@@ -1640,7 +1536,6 @@
 
         function toggleVnSpeech() {
             isVnSpeechEnabled = !isVnSpeechEnabled;
-            localStorage.setItem(SPEECH_VN_KEY, isVnSpeechEnabled);
             updateVnSpeechUI();
         }
 
@@ -1656,8 +1551,7 @@
         }
 
         function initTheme() {
-            const savedTheme = localStorage.getItem(THEME_KEY);
-            if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
                 document.documentElement.classList.add('dark');
                 document.getElementById('theme-icon').className = 'fa-solid fa-sun';
             }
@@ -1666,14 +1560,11 @@
         function toggleDarkMode() {
             const isDark = document.documentElement.classList.toggle('dark');
             document.getElementById('theme-icon').className = isDark ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
-            localStorage.setItem(THEME_KEY, isDark ? 'dark' : 'light');
         }
 
         function initDeviceMode() {
-            const savedMode = localStorage.getItem(DEVICE_MODE_KEY);
-            deviceMode = savedMode === 'phone' ? 'phone' : 'desktop';
-
-            document.body.classList.toggle('phone-mode', deviceMode === 'phone');
+            deviceMode = 'desktop';
+            document.body.classList.toggle('phone-mode', false);
             updateDeviceModeUI();
         }
 
@@ -1681,7 +1572,6 @@
             stopAuto();
 
             deviceMode = deviceMode === 'desktop' ? 'phone' : 'desktop';
-            localStorage.setItem(DEVICE_MODE_KEY, deviceMode);
             document.body.classList.toggle('phone-mode', deviceMode === 'phone');
             updateDeviceModeUI();
 
@@ -1738,21 +1628,18 @@
             const valLabel = document.getElementById('page-zoom-val');
             if(valLabel) valLabel.innerText = val + '%';
             document.body.style.zoom = val + '%';
-            localStorage.setItem(ZOOM_KEY, val);
         }
 
         function updateColors() {
             colors.hanzi = document.getElementById('color-hanzi').value;
             colors.pinyin = document.getElementById('color-pinyin').value;
             colors.meaning = document.getElementById('color-meaning').value;
-            localStorage.setItem(COLOR_KEY, JSON.stringify(colors));
             applyColorStyles();
             renderTable();
         }
 
         function updateWeight(type, val) {
             weights[type] = val;
-            localStorage.setItem(WEIGHT_KEY, JSON.stringify(weights));
             applyColorStyles();
             renderTable();
         }
@@ -1824,21 +1711,22 @@
             });
         }
 
-        function toggleLearned(index) {
+        async function toggleLearned(index) {
+            if (!vocabulary[index]) return;
             vocabulary[index].learned = !vocabulary[index].learned;
-            persistVocabulary();
             renderTable();
+            await persistVocabularyItem(vocabulary[index]);
         }
 
         function isFavorite(item) { return !!(item && item.favorite); }
 
-        function toggleFavorite(index) {
+        async function toggleFavorite(index) {
             if (!vocabulary[index]) return;
             vocabulary[index].favorite = !vocabulary[index].favorite;
-            persistVocabulary();
             renderTable();
             updateFavoriteCountHint();
             updateCurrentFavoriteButtons(vocabulary[index]);
+            await persistVocabularyItem(vocabulary[index]);
         }
 
         function toggleCurrentFavorite() {
@@ -1857,8 +1745,8 @@
             updateFavoriteCountHint();
             renderTable();
 
-            // Sau khi UI đã đổi, lưu xuống localStorage + Firebase.
-            persistVocabulary();
+            // Lưu trực tiếp trạng thái yêu thích lên Cloud.
+            persistVocabularyItem(main);
         }
 
         function updateCurrentFavoriteButtons(item) {
