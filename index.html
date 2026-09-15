@@ -284,10 +284,19 @@
         .favorite-star-btn {
             color: #cbd5e1 !important;
             -webkit-text-fill-color: #cbd5e1 !important;
-            font-size: 24px;
+            font-size: 27px;
             line-height: 1;
-            transition: color .15s ease, transform .15s ease, background-color .15s ease;
+            transition: color .15s ease, transform .15s ease;
             cursor: pointer;
+            border: none !important;
+            background: transparent !important;
+            box-shadow: none !important;
+            padding: 0 !important;
+            width: auto !important;
+            height: auto !important;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
         }
         .favorite-star-btn:hover { transform: scale(1.08); }
         .favorite-star-btn.is-favorite {
@@ -310,6 +319,19 @@
             text-shadow: 0 0 7px rgba(250, 204, 21, .3);
         }
         .text-custom-muted { color: var(--text-muted); }
+
+        .study-lesson-list { scrollbar-width: thin; }
+        #quiz-lesson-list, #flash-lesson-list { scrollbar-width: thin; }
+        .flashcard-container > .favorite-star-btn {
+            position: absolute !important;
+            top: 10px !important;
+            right: 12px !important;
+        }
+        #question-card > .favorite-star-btn {
+            position: absolute !important;
+            top: 10px !important;
+            right: 12px !important;
+        }
 
         .setting-item-box {
             background-color: var(--setting-item-bg);
@@ -879,6 +901,12 @@
                         <p id="favorite-count-hint" class="text-[10px] text-custom-muted mt-2"></p>
                     </div>
 
+                    <div>
+                        <label class="text-[11px] font-bold text-custom-muted uppercase tracking-wider mb-3 block">Bài học</label>
+                        <div id="quiz-lesson-list" class="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-48 overflow-y-auto pr-1"></div>
+                        <p id="quiz-lesson-hint" class="text-[10px] text-custom-muted mt-2"></p>
+                    </div>
+
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div class="setting-item-box">
                             <div class="flex justify-between items-center mb-3">
@@ -933,7 +961,7 @@
                 </div>
 
                 <div id="question-card" class="q-card shadow-sm relative">
-                    <button id="quiz-favorite-btn" type="button" onclick="toggleCurrentFavorite(); return false;" class="favorite-star-btn absolute top-3 right-3 w-10 h-10 rounded-xl border bg-custom-card z-10" style="color:#cbd5e1 !important;-webkit-text-fill-color:#cbd5e1 !important;" title="Thêm vào yêu thích">☆</button>
+                    <button id="quiz-favorite-btn" type="button" onclick="toggleCurrentFavorite(); return false;" class="favorite-star-btn absolute top-2 right-2 z-20" style="color:#cbd5e1 !important;-webkit-text-fill-color:#cbd5e1 !important;" title="Thêm vào yêu thích">☆</button>
                     <div class="q-content-left">
                         <div id="q-main-text">--</div>
                         <div id="q-info" class="q-details hidden">
@@ -1058,23 +1086,29 @@
                     <label class="text-[11px] font-bold text-custom-muted uppercase mb-3 block">Nguồn từ vựng</label>
                     <div class="grid grid-cols-2 gap-3">
                         <label class="relative">
-                            <input type="radio" name="flash-source" value="active" checked class="hidden">
+                            <input type="radio" name="flash-source" value="active" checked class="hidden" onchange="updateFlashSourceUI()">
                             <div class="radio-box">Toàn bộ từ vựng</div>
                         </label>
                         <label class="relative">
-                            <input type="radio" name="flash-source" value="favorite" class="hidden">
+                            <input type="radio" name="flash-source" value="favorite" class="hidden" onchange="updateFlashSourceUI()">
                             <div class="radio-box">⭐ Yêu thích</div>
                         </label>
                     </div>
+                </div>
+
+                <div>
+                    <label class="text-[11px] font-bold text-custom-muted uppercase tracking-wider mb-3 block">Bài học</label>
+                    <div id="flash-lesson-list" class="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-48 overflow-y-auto pr-1"></div>
+                    <p id="flash-lesson-hint" class="text-[10px] text-custom-muted mt-2"></p>
                 </div>
 
                 <button onclick="startFlashcards()" class="w-full bg-blue-600 text-white py-4 rounded-2xl text-sm font-bold hover:bg-blue-700 shadow-lg uppercase">Bắt đầu học Flashcard</button>
             </div>
 
             <div id="flashcard-active" class="hidden relative">
-                <button id="flash-favorite-btn" type="button" onclick="toggleCurrentFavorite(); return false;" class="favorite-star-btn absolute top-0 right-0 w-10 h-10 rounded-xl border bg-custom-card z-10" style="color:#cbd5e1 !important;-webkit-text-fill-color:#cbd5e1 !important;" title="Thêm vào yêu thích">☆</button>
                 <p id="flash-progress" class="text-center text-[11px] font-bold text-custom-muted uppercase mb-4">THẺ 1/10</p>
-                <div class="flashcard-container" onclick="flipCard()">
+                <div class="flashcard-container relative" onclick="flipCard()">
+                    <button id="flash-favorite-btn" type="button" onclick="toggleCurrentFavorite(); event.stopPropagation(); return false;" class="favorite-star-btn absolute top-2 right-2 z-20" style="color:#cbd5e1 !important;-webkit-text-fill-color:#cbd5e1 !important;" title="Thêm vào yêu thích">☆</button>
                     <div class="flashcard-inner" id="flashcard-inner">
                         <div class="flashcard-front">
                             <div id="flash-h-front" class="chinese-font text-color-hanzi"></div>
@@ -1115,6 +1149,7 @@
     appId: "1:1073522178190:web:bfaf7bcc44079efe54b1df",
     measurementId: "G-Z6SYKZDKEL"
   };
+
 
         // Mật khẩu chỉ dùng để khóa thao tác quản trị file gốc trong giao diện.
         // Bảo mật thật sự vẫn phải được kiểm soát bằng Firebase Authentication + Firestore Rules.
@@ -1169,6 +1204,8 @@
 
         let hideMeaningPinyin = false;
         let tableSoundEnabled = true;
+        let selectedQuizLesson = '__ALL__';
+        let selectedFlashLesson = '__ALL__';
 
         function firebaseConfigured() {
             return FIREBASE_CONFIG &&
@@ -1267,7 +1304,7 @@
                         vocabulary = [];
                         originalFileExists = false;
                         originalFileUnlocked = false;
-                        renderTable(); updateFavoriteCountHint(); updateOriginalFileUI();
+                        renderTable(); updateFavoriteCountHint(); updateOriginalFileUI(); renderLessonSelectors(); updateQuestionSourceUI(); updateFlashSourceUI();
                         setCloudStatus('Chưa đăng nhập', 'orange');
                     }
                 });
@@ -1297,7 +1334,7 @@
             try {
                 const snap = await col.get();
                 vocabulary = snap.docs.map(vocabFromDoc).filter(Boolean).sort((a,b) => a.h.localeCompare(b.h));
-                renderTable(); updateFavoriteCountHint(); updateOriginalFileUI();
+                renderTable(); updateFavoriteCountHint(); updateOriginalFileUI(); renderLessonSelectors(); updateQuestionSourceUI(); updateFlashSourceUI();
                 setCloudStatus('☁ Đã đồng bộ', 'green');
             } catch (error) {
                 console.error('Cloud load error:', error);
@@ -1313,7 +1350,7 @@
             unsubscribeVocabulary = col.onSnapshot(snap => {
                 if (isCloudLoading) return;
                 vocabulary = snap.docs.map(vocabFromDoc).filter(Boolean).sort((a,b) => a.h.localeCompare(b.h));
-                renderTable(); updateFavoriteCountHint(); updateOriginalFileUI();
+                renderTable(); updateFavoriteCountHint(); updateOriginalFileUI(); renderLessonSelectors(); updateQuestionSourceUI(); updateFlashSourceUI();
                 if (quizPool[currentIndex]) {
                     const fresh = vocabulary.find(v => v.h === quizPool[currentIndex].h);
                     if (fresh) { quizPool[currentIndex] = { ...quizPool[currentIndex], ...fresh }; updateCurrentFavoriteButtons(fresh); }
@@ -1869,19 +1906,78 @@ favorite:!!item.favorite, showDetail:!!item.showDetail,
             document.getElementById('manual-modes').classList.toggle('hidden', feature !== 'manual');
         }
 
+        function getLessonList() {
+            const lessons = [...new Set(vocabulary.map(v => String(v.lesson || '').trim()).filter(Boolean))];
+            return lessons.sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }));
+        }
+
+        function renderLessonSelectors() {
+            const lessons = getLessonList();
+            const render = (containerId, name, selected, setter, hintId) => {
+                const box = document.getElementById(containerId);
+                if (!box) return;
+                const options = ['__ALL__', ...lessons];
+                if (!options.includes(selected)) selected = '__ALL__';
+                box.innerHTML = options.map((lesson, i) => {
+                    const checked = lesson === selected;
+                    const label = lesson === '__ALL__' ? 'Tất cả bài học' : `Bài ${lesson}`;
+                    return `<label class="relative cursor-pointer">
+                        <input type="radio" name="${name}" value="${String(lesson).replace(/&/g,'&amp;').replace(/"/g,'&quot;')}" ${checked ? 'checked' : ''} class="hidden" onchange="${setter}(this.value)">
+                        <div class="radio-box text-[11px] ${checked ? 'ring-2 ring-blue-500 bg-blue-600 text-white border-blue-600' : ''}">${label}</div>
+                    </label>`;
+                }).join('');
+                const hint = document.getElementById(hintId);
+                if (hint) hint.innerText = lessons.length ? `Có ${lessons.length} bài học trong dữ liệu Cloud.` : 'Chưa có thông tin bài học trong dữ liệu.';
+            };
+            render('quiz-lesson-list','quiz-lesson',selectedQuizLesson,'selectQuizLesson','quiz-lesson-hint');
+            render('flash-lesson-list','flash-lesson',selectedFlashLesson,'selectFlashLesson','flash-lesson-hint');
+        }
+
+        function selectQuizLesson(value) {
+            selectedQuizLesson = value || '__ALL__';
+            renderLessonSelectors();
+            updateQuestionSourceUI();
+            setMaxQuestions();
+        }
+
+        function selectFlashLesson(value) {
+            selectedFlashLesson = value || '__ALL__';
+            renderLessonSelectors();
+            updateFlashSourceUI();
+        }
+
+        function filterStudyVocabulary(source, lesson) {
+            let result = source === 'favorite' ? vocabulary.filter(v => v.favorite) : [...vocabulary];
+            if (lesson && lesson !== '__ALL__') result = result.filter(v => String(v.lesson || '').trim() === String(lesson).trim());
+            return result;
+        }
+
         function updateQuestionSourceUI() {
             updateFavoriteCountHint();
+            const source = document.querySelector('input[name="q-source"]:checked')?.value || 'active';
+            const count = filterStudyVocabulary(source, selectedQuizLesson).length;
+            const el = document.getElementById('favorite-count-hint');
+            if (el) el.innerText = source === 'favorite'
+                ? `Có ${count} từ yêu thích trong ${selectedQuizLesson === '__ALL__' ? 'tất cả bài học' : 'Bài ' + selectedQuizLesson}.`
+                : `Có ${count} từ trong ${selectedQuizLesson === '__ALL__' ? 'tất cả bài học' : 'Bài ' + selectedQuizLesson}.`;
+        }
+
+        function updateFlashSourceUI() {
+            const source = document.querySelector('input[name="flash-source"]:checked')?.value || 'active';
+            const count = filterStudyVocabulary(source, selectedFlashLesson).length;
+            const el = document.getElementById('flash-lesson-hint');
+            if (el) el.innerText = `Có ${count} từ phù hợp để học Flashcard.`;
         }
 
         function setMaxQuestions() {
             const source = document.querySelector('input[name="q-source"]:checked')?.value || 'active';
-            const activeVocab = source === 'favorite' ? vocabulary.filter(v => v.favorite) : vocabulary;
+            const activeVocab = filterStudyVocabulary(source, selectedQuizLesson);
             document.getElementById('q-count-input').value = activeVocab.length;
         }
 
         function startQuiz() {
             const source = document.querySelector('input[name="q-source"]:checked')?.value || 'active';
-            const activeVocab = source === 'favorite' ? vocabulary.filter(v => v.favorite) : vocabulary;
+            const activeVocab = filterStudyVocabulary(source, selectedQuizLesson);
             if (activeVocab.length < 2) { alert(source === 'favorite' ? "Cần ít nhất 2 từ yêu thích!" : "Cần ít nhất 2 từ vựng!"); return; }
 
             const countInput = document.getElementById('q-count-input').value;
@@ -2174,7 +2270,7 @@ favorite:!!item.favorite, showDetail:!!item.showDetail,
 
         function startFlashcards() {
             const source = document.querySelector('input[name="flash-source"]:checked')?.value || 'active';
-            const activeVocab = source === 'favorite' ? vocabulary.filter(v => v.favorite) : vocabulary;
+            const activeVocab = filterStudyVocabulary(source, selectedFlashLesson);
             if (activeVocab.length === 0) { alert(source === 'favorite' ? "Chưa có từ yêu thích!" : "Không có từ vựng!"); return; }
             quizPool = [...activeVocab].sort(() => 0.5 - Math.random());
             currentIndex = 0;
@@ -2436,6 +2532,9 @@ favorite:!!item.favorite, showDetail:!!item.showDetail,
         // Khởi động Firebase/Auth sau khi toàn bộ giao diện đã sẵn sàng.
         // Dữ liệu từ vựng không lưu trên thiết bị; Cloud là nguồn dữ liệu duy nhất.
         document.addEventListener('DOMContentLoaded', () => {
+            renderLessonSelectors();
+            updateQuestionSourceUI();
+            updateFlashSourceUI();
             initFirebaseCloud();
         });
     </script>
