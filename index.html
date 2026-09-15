@@ -654,8 +654,7 @@
 <body class="p-4 md:p-8">
     <div class="max-w-2xl mx-auto mb-6 flex justify-between items-center">
         <div class="flex items-center gap-2">
-     
-            <h1 class="font-bold text-base tracking-tight uppercase">HSK</h1>
+    
         </div>
  
         <div class="flex items-center gap-2">
@@ -1223,7 +1222,38 @@
             return firebase.firestore().collection('users').doc(currentUser.uid).collection('app').doc('metadata');
         }
 
-        function wordDocId(hanzi) {
+        // =========================================================
+        // KHÓA TỪ VỰNG / KIỂM TRA TRÙNG
+        // =========================================================
+        // Một bản ghi được xác định bởi TOÀN BỘ 3 thành phần:
+        // Hán tự + Pinyin + Nghĩa. Cùng Hán tự nhưng khác Pinyin/Nghĩa
+        // vẫn là các từ khác nhau và được phép tồn tại đồng thời.
+        function normalizeVocabPart(value, lower = false) {
+            const s = String(value ?? '').normalize('NFC').trim().replace(/\s+/g, ' ');
+            return lower ? s.toLowerCase() : s;
+        }
+
+        function vocabKey(item) {
+            if (!item) return '';
+            return JSON.stringify([
+                normalizeVocabPart(item.h),
+                normalizeVocabPart(item.p, true),
+                normalizeVocabPart(item.m, true)
+            ]);
+        }
+
+        function vocabDocId(item) {
+            const source = vocabKey(item);
+            let hash = 2166136261;
+            for (let i = 0; i < source.length; i++) {
+                hash ^= source.charCodeAt(i);
+                hash += (hash << 1) + (hash << 4) + (hash << 7) + (hash << 8) + (hash << 24);
+            }
+            return 'v_' + (hash >>> 0).toString(36);
+        }
+
+        // ID cũ, chỉ dùng để nhận diện dữ liệu trước khi đổi cơ chế.
+        function legacyWordDocId(hanzi) {
             let hash = 2166136261;
             const s = String(hanzi || '').trim();
             for (let i = 0; i < s.length; i++) {
@@ -1232,6 +1262,8 @@
             }
             return 'w_' + (hash >>> 0).toString(36);
         }
+
+        function wordDocId(item) { return vocabDocId(item); }
 
         function normalizeVocabulary(items) {
             return (Array.isArray(items) ? items : []).filter(x => x && String(x.h || '').trim()).map(x => ({
@@ -1248,6 +1280,22 @@
         function vocabFromDoc(doc) {
             const d = doc.data() || {};
             return normalizeVocabulary([d])[0];
+        }
+
+        async function migrateLegacyVocabularyDocs(docs) {
+            if (!currentUser || !firestoreReady || !Array.isArray(docs)) return;
+            const legacyDocs = docs.filter(doc => doc.id && doc.id.startsWith('w_'));
+            if (!legacyDocs.length) return;
+            const col = getVocabularyCollection();
+            const operations = [];
+            legacyDocs.forEach(doc => {
+                const item = vocabFromDoc(doc);
+                if (!item) return;
+                operations.push({type:'set',ref:col.doc(vocabDocId(item)),data:{h:item.h,p:item.p||'',m:item.m||'',lesson:item.lesson||'',favorite:!!item.favorite,showDetail:!!item.showDetail,isOriginal:!!item.isOriginal,migratedFromLegacy:true,updatedAt:firebase.firestore.FieldValue.serverTimestamp()},options:{merge:true}});
+                operations.push({type:'delete',ref:doc.ref});
+            });
+            if (!operations.length) return;
+            try { await writeBatchChunks(operations); } catch(error) { console.error('Legacy vocabulary migration error:', error); }
         }
 
         function setCloudStatus(text, type = 'muted') {
@@ -1333,9 +1381,10 @@
             setCloudStatus('☁ Đang tải dữ liệu...', 'blue');
             try {
                 const snap = await col.get();
-                vocabulary = snap.docs.map(vocabFromDoc).filter(Boolean).sort((a,b) => a.h.localeCompare(b.h));
+                vocabulary = snap.docs.map(vocabFromDoc).filter(Boolean).sort((a,b) => { const ah=a.h.localeCompare(b.h), ap=a.p.localeCompare(b.p), am=a.m.localeCompare(b.m); return ah||ap||am; });
                 renderTable(); updateFavoriteCountHint(); updateOriginalFileUI(); renderLessonSelectors(); updateQuestionSourceUI(); updateFlashSourceUI();
                 setCloudStatus('☁ Đã đồng bộ', 'green');
+                migrateLegacyVocabularyDocs(snap.docs);
             } catch (error) {
                 console.error('Cloud load error:', error);
                 setCloudStatus('⚠ Không tải được Cloud', 'red');
@@ -1349,10 +1398,10 @@
             if (!col) return;
             unsubscribeVocabulary = col.onSnapshot(snap => {
                 if (isCloudLoading) return;
-                vocabulary = snap.docs.map(vocabFromDoc).filter(Boolean).sort((a,b) => a.h.localeCompare(b.h));
+                vocabulary = snap.docs.map(vocabFromDoc).filter(Boolean).sort((a,b) => { const ah=a.h.localeCompare(b.h), ap=a.p.localeCompare(b.p), am=a.m.localeCompare(b.m); return ah||ap||am; });
                 renderTable(); updateFavoriteCountHint(); updateOriginalFileUI(); renderLessonSelectors(); updateQuestionSourceUI(); updateFlashSourceUI();
                 if (quizPool[currentIndex]) {
-                    const fresh = vocabulary.find(v => v.h === quizPool[currentIndex].h);
+                    const fresh = vocabulary.find(v => vocabKey(v) === vocabKey(quizPool[currentIndex]));
                     if (fresh) { quizPool[currentIndex] = { ...quizPool[currentIndex], ...fresh }; updateCurrentFavoriteButtons(fresh); }
                 }
                 if (currentUser) setCloudStatus('☁ Đã đồng bộ', 'green');
@@ -1381,7 +1430,7 @@
         async function persistVocabularyItem(item) {
             if (!item || !currentUser || !firestoreReady) { alert('Bạn cần đăng nhập Google để lưu dữ liệu.'); return false; }
             try {
-                await getVocabularyCollection().doc(wordDocId(item.h)).set({
+                await getVocabularyCollection().doc(vocabDocId(item)).set({
                     h:item.h, p:item.p||'', m:item.m||'', lesson:item.lesson||'',
 favorite:!!item.favorite, showDetail:!!item.showDetail,
                     isOriginal:!!item.isOriginal, updatedAt:firebase.firestore.FieldValue.serverTimestamp()
@@ -1410,17 +1459,21 @@ favorite:!!item.favorite, showDetail:!!item.showDetail,
             const input = document.getElementById('bulk-input').value.trim();
             if (!input) { alert('Hãy dán dữ liệu cần bổ sung.'); return; }
             const parsed = input.split('\n').map(parseVocabString).filter(x => x && x.h);
-            const existing = new Map(vocabulary.map(v => [v.h,v]));
+            const existing = new Map(vocabulary.map(v => [vocabKey(v),v]));
             const seen = new Set(), uniqueNew = [], duplicates = [];
-            parsed.forEach(item => { if (seen.has(item.h)||existing.has(item.h)) duplicates.push(item.h); else { seen.add(item.h); uniqueNew.push(item); } });
-            if (!uniqueNew.length) { alert(`Không có từ mới để bổ sung. ${duplicates.length} từ đã tồn tại/trùng.`); return; }
+            parsed.forEach(item => {
+                const key = vocabKey(item);
+                if (seen.has(key) || existing.has(key)) duplicates.push(item);
+                else { seen.add(key); uniqueNew.push(item); }
+            });
+            if (!uniqueNew.length) { alert(`Không có cụm từ mới để bổ sung. ${duplicates.length} cụm Hán tự-Pinyin-Nghĩa đã tồn tại/trùng.`); return; }
             setCloudStatus('☁ Đang bổ sung từ...', 'blue');
             try {
                 const col=getVocabularyCollection();
-                await writeBatchChunks(uniqueNew.map(item=>({type:'set',ref:col.doc(wordDocId(item.h)),data:{h:item.h,p:item.p||'',m:item.m||'',lesson:'',favorite:false,showDetail:false,isOriginal:false,createdAt:firebase.firestore.FieldValue.serverTimestamp(),updatedAt:firebase.firestore.FieldValue.serverTimestamp()}})));
+                await writeBatchChunks(uniqueNew.map(item=>({type:'set',ref:col.doc(vocabDocId(item)),data:{h:item.h,p:item.p||'',m:item.m||'',lesson:'',favorite:false,showDetail:false,isOriginal:false,createdAt:firebase.firestore.FieldValue.serverTimestamp(),updatedAt:firebase.firestore.FieldValue.serverTimestamp()}})));
                 document.getElementById('bulk-input').value='';
                 setCloudStatus('☁ Đã đồng bộ','green');
-                alert(`Đã bổ sung ${uniqueNew.length} từ mới lên Cloud.` + (duplicates.length ? `\nBỏ qua ${duplicates.length} từ đã tồn tại/trùng.` : ''));
+                alert(`Đã bổ sung ${uniqueNew.length} cụm từ mới lên Cloud.` + (duplicates.length ? `\nBỏ qua ${duplicates.length} cụm Hán tự-Pinyin-Nghĩa đã tồn tại/trùng.` : ''));
             } catch(error) { console.error(error); setCloudStatus('⚠ Bổ sung lỗi','red'); alert('Bổ sung từ vựng thất bại: ' + (error.message || error)); }
         }
 
@@ -1475,8 +1528,8 @@ favorite:!!item.favorite, showDetail:!!item.showDetail,
                     rows.forEach(row=>{if(!row||row.length<2)return;const lesson=String(row[0]??'').trim();const item=parseVocabString(String(row[1]??'').trim());if(item&&item.h){item.lesson=lesson;item.isOriginal=true;items.push(item);if(lesson){(excelDataByLesson[lesson] ||= []).push(item);}}});
                     if(!items.length){alert('Không tìm thấy dữ liệu từ vựng hợp lệ trong file Excel.');event.target.value='';return;}
                     pendingOriginalExcel={fileName:file.name,items};
-                    const unique=new Set(items.map(x=>x.h)).size;
-                    document.getElementById('original-excel-preview').innerText=`Đã đọc ${items.length} dòng hợp lệ, ${unique} từ Hán tự duy nhất. Bấm "LƯU FILE GỐC LÊN CLOUD".`;
+                    const unique=new Set(items.map(x=>vocabKey(x))).size;
+                    document.getElementById('original-excel-preview').innerText=`Đã đọc ${items.length} dòng hợp lệ, ${unique} cụm Hán tự-Pinyin-Nghĩa duy nhất. Bấm "LƯU FILE GỐC LÊN CLOUD".`;
                 }catch(error){console.error(error);alert('Không đọc được file Excel: '+(error.message||error));event.target.value='';}
             };
             reader.readAsArrayBuffer(file);
@@ -1486,14 +1539,14 @@ favorite:!!item.favorite, showDetail:!!item.showDetail,
             if(!currentUser||!firestoreReady){alert('Hãy đăng nhập Google trước.');return;}
             if(!pendingOriginalExcel?.items?.length){alert('Hãy chọn file Excel gốc trước.');return;}
             if(originalFileExists&&!originalFileUnlocked){alert('Phải mở khóa bằng mật khẩu trước.');return;}
-            const map=new Map(); pendingOriginalExcel.items.forEach(x=>{if(!map.has(x.h))map.set(x.h,x);});
+            const map=new Map(); pendingOriginalExcel.items.forEach(x=>{const key=vocabKey(x); if(!map.has(key)) map.set(key,x);});
             const items=[...map.values()];
             if(originalFileExists&&!confirm(`Thay thế file gốc hiện tại bằng "${pendingOriginalExcel.fileName}" (${items.length} từ)? Trạng thái ⭐ của từ trùng sẽ được giữ lại.`))return;
             setCloudStatus('☁ Đang lưu file gốc...','blue');
             try{
-                const col=getVocabularyCollection(), currentOriginals=vocabulary.filter(v=>v.isOriginal), newKeys=new Set(items.map(x=>x.h)), existing=new Map(vocabulary.map(v=>[v.h,v]));
-                const deletes=currentOriginals.filter(v=>!newKeys.has(v.h)).map(v=>({type:'delete',ref:col.doc(wordDocId(v.h))}));
-                const sets=items.map(x=>{const old=existing.get(x.h);const data={h:x.h,p:x.p||'',m:x.m||'',lesson:x.lesson||'',favorite:old?!!old.favorite:false,showDetail:old?!!old.showDetail:false,isOriginal:true,updatedAt:firebase.firestore.FieldValue.serverTimestamp()};if(!old)data.createdAt=firebase.firestore.FieldValue.serverTimestamp();return {type:'set',ref:col.doc(wordDocId(x.h)),data,options:{merge:true}};});
+                const col=getVocabularyCollection(), currentOriginals=vocabulary.filter(v=>v.isOriginal), newKeys=new Set(items.map(x=>vocabKey(x))), existing=new Map(vocabulary.map(v=>[vocabKey(v),v]));
+                const deletes=currentOriginals.filter(v=>!newKeys.has(vocabKey(v))).map(v=>({type:'delete',ref:col.doc(vocabDocId(v))}));
+                const sets=items.map(x=>{const old=existing.get(vocabKey(x));const data={h:x.h,p:x.p||'',m:x.m||'',lesson:x.lesson||'',favorite:old?!!old.favorite:false,showDetail:old?!!old.showDetail:false,isOriginal:true,updatedAt:firebase.firestore.FieldValue.serverTimestamp()};if(!old)data.createdAt=firebase.firestore.FieldValue.serverTimestamp();return {type:'set',ref:col.doc(vocabDocId(x)),data,options:{merge:true}};});
                 await writeBatchChunks([...deletes,...sets]);
                 await getAppMetaRef().set({originalFile:{name:pendingOriginalExcel.fileName,count:items.length,uploadedAt:firebase.firestore.FieldValue.serverTimestamp(),version:1}},{merge:true});
                 pendingOriginalExcel=null;document.getElementById('excel-file-input').value='';document.getElementById('original-excel-preview').innerText='Đã lưu file gốc lên Cloud.';originalFileExists=true;originalFileUnlocked=false;
@@ -1511,7 +1564,7 @@ favorite:!!item.favorite, showDetail:!!item.showDetail,
             setCloudStatus('☁ Đang xóa file gốc...','blue');
             try{
                 const col=getVocabularyCollection();
-                await writeBatchChunks(originals.map(v=>({type:'delete',ref:col.doc(wordDocId(v.h))})));
+                await writeBatchChunks(originals.map(v=>({type:'delete',ref:col.doc(vocabDocId(v))})));
                 await getAppMetaRef().set({originalFile:firebase.firestore.FieldValue.delete()},{merge:true});
                 originalFileExists=false;originalFileUnlocked=false;pendingOriginalExcel=null;updateOriginalFileUI();await loadCloudVocabulary();setCloudStatus('☁ Đã xóa file gốc','green');
                 alert(`Đã xóa file gốc và ${count} từ thuộc file gốc. Từ bổ sung vẫn được giữ.`);
@@ -1782,7 +1835,7 @@ favorite:!!item.favorite, showDetail:!!item.showDetail,
         function toggleCurrentFavorite() {
             const item = quizPool[currentIndex];
             if (!item) return;
-            const main = vocabulary.find(v => v.h === item.h);
+            const main = vocabulary.find(v => vocabKey(v) === vocabKey(item));
             if (!main) return;
 
             // Đổi trạng thái yêu thích trên bản ghi gốc và item đang học.
