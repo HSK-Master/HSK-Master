@@ -8,6 +8,10 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Thư viện đọc file Excel -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <!-- Firebase: Authentication + Firestore -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+SC:wght@400;500;700&display=swap');
         :root {
@@ -611,6 +615,13 @@
         </div>
  
         <div class="flex items-center gap-2">
+            <div id="cloud-sync-box" class="flex items-center gap-2 mr-1">
+                <span id="sync-status" class="text-[9px] font-bold text-custom-muted uppercase">Đang kết nối...</span>
+                <button id="btn-google-login" onclick="signInWithGoogle()" class="hidden bg-blue-600 text-white px-3 py-2 rounded-lg text-[10px] font-bold uppercase">
+                    <i class="fa-brands fa-google mr-1"></i> Đăng nhập Google
+                </button>
+                <button id="btn-google-logout" onclick="signOutGoogle()" class="hidden bg-slate-100 dark:bg-slate-800 px-3 py-2 rounded-lg text-[10px] font-bold">Đăng xuất</button>
+            </div>
             <div id="global-audio-controls" class="hidden flex items-center gap-2">
                 <!-- Dropdown Chọn giọng phát tiếng Việt (Kích thước 40x40px với icon fa-language) -->
                 <div id="wrapper-vn-voice-select" class="select-vn-voice-box icon-btn-40" title="Chọn giọng đọc tiếng Việt">
@@ -775,6 +786,7 @@
                                 <th class="w-1/3">Pinyin</th>
                                 <th>Nghĩa</th>
                                 <th class="w-16 text-center">Thuộc</th>
+                                <th class="w-12 text-center">⭐</th>
                             </tr>
                         </thead>
                         <tbody id="vocab-list" class="text-sm"></tbody>
@@ -840,6 +852,21 @@
                         </div>
                     </div>
 
+                    <div>
+                        <label class="text-[11px] font-bold text-custom-muted uppercase tracking-wider mb-3 block">Nguồn từ vựng</label>
+                        <div class="grid grid-cols-2 gap-3">
+                            <label class="relative">
+                                <input type="radio" name="q-source" value="active" checked class="hidden" onchange="updateQuestionSourceUI()">
+                                <div class="radio-box">Từ chưa thuộc</div>
+                            </label>
+                            <label class="relative">
+                                <input type="radio" name="q-source" value="favorite" class="hidden" onchange="updateQuestionSourceUI()">
+                                <div class="radio-box">⭐ Yêu thích</div>
+                            </label>
+                        </div>
+                        <p id="favorite-count-hint" class="text-[10px] text-custom-muted mt-2"></p>
+                    </div>
+
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div class="setting-item-box">
                             <div class="flex justify-between items-center mb-3">
@@ -893,7 +920,8 @@
                     </div>
                 </div>
 
-                <div id="question-card" class="q-card shadow-sm">
+                <div id="question-card" class="q-card shadow-sm relative">
+                    <button id="quiz-favorite-btn" onclick="toggleCurrentFavorite()" class="absolute top-3 right-3 w-10 h-10 rounded-xl border bg-custom-card text-xl z-10" title="Thêm vào yêu thích">☆</button>
                     <div class="q-content-left">
                         <div id="q-main-text">--</div>
                         <div id="q-info" class="q-details hidden">
@@ -1014,10 +1042,25 @@
                     </div>
                 </div>
 
+                <div>
+                    <label class="text-[11px] font-bold text-custom-muted uppercase mb-3 block">Nguồn từ vựng</label>
+                    <div class="grid grid-cols-2 gap-3">
+                        <label class="relative">
+                            <input type="radio" name="flash-source" value="active" checked class="hidden">
+                            <div class="radio-box">Từ chưa thuộc</div>
+                        </label>
+                        <label class="relative">
+                            <input type="radio" name="flash-source" value="favorite" class="hidden">
+                            <div class="radio-box">⭐ Yêu thích</div>
+                        </label>
+                    </div>
+                </div>
+
                 <button onclick="startFlashcards()" class="w-full bg-blue-600 text-white py-4 rounded-2xl text-sm font-bold hover:bg-blue-700 shadow-lg uppercase">Bắt đầu học Flashcard</button>
             </div>
 
-            <div id="flashcard-active" class="hidden">
+            <div id="flashcard-active" class="hidden relative">
+                <button id="flash-favorite-btn" onclick="toggleCurrentFavorite()" class="absolute top-0 right-0 w-10 h-10 rounded-xl border bg-custom-card text-xl z-10" title="Thêm vào yêu thích">☆</button>
                 <p id="flash-progress" class="text-center text-[11px] font-bold text-custom-muted uppercase mb-4">THẺ 1/10</p>
                 <div class="flashcard-container" onclick="flipCard()">
                     <div class="flashcard-inner" id="flashcard-inner">
@@ -1048,6 +1091,19 @@
     </main>
 
     <script>
+        // =========================================================
+        // FIREBASE CLOUD SYNC
+        // =========================================================
+        // DÁN firebaseConfig của Firebase Web App của bạn vào đây.
+        const FIREBASE_CONFIG = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT.firebaseapp.com",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT.appspot.com",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
         const STORAGE_KEY = 'vocal_db_v25';
         const COLOR_KEY = 'vocal_colors_config_v2';
         const THEME_KEY = 'vocal_theme_preference';
@@ -1060,7 +1116,13 @@
         const SPEECH_VN_KEY = 'vocal_speech_vn_preference';
         const SELECTED_VN_VOICE_KEY = 'vocal_selected_vn_voice';
 
-        let vocabulary = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+        let vocabulary = safeJsonParse(localStorage.getItem(STORAGE_KEY), []);
+        let currentUser = null;
+        let firestoreReady = false;
+        let cloudSyncTimer = null;
+        let isCloudLoading = false;
+        let lastCloudWriteAt = 0;
+        let unsubscribeVocabulary = null;
         let colors = JSON.parse(localStorage.getItem(COLOR_KEY)) || { hanzi: '#ef4444', pinyin: '#22c55e', meaning: '#3b82f6' };
         let weights = JSON.parse(localStorage.getItem(WEIGHT_KEY)) || { hanzi: 450, pinyin: 400, meaning: 400 };
         let pageZoom = localStorage.getItem(ZOOM_KEY) || 135;
@@ -1101,7 +1163,7 @@
         let hideMeaningPinyin = false;
         let tableSoundEnabled = true;
 
-        window.onload = () => {
+        window.onload = async () => {
             initTheme();
             initDeviceMode();
             initColors();
@@ -1110,26 +1172,216 @@
             applyColorStyles();
             renderTable();
             loadAvailableVoices();
-
             updateQFontSize(100);
             updateAFontSize(40);
             updateAnsFontSize(40);
+            updateQuestionSourceUI();
+            updateFavoriteCountHint();
 
             const userInput = document.getElementById('user-answer');
             userInput.addEventListener('keydown', function(e) {
                 if (e.key === 'Enter') {
                     e.preventDefault();
-                    if (!answered) {
-                        checkManualAnswer();
-                    } else {
-                        nextQuestion();
-                    }
+                    if (!answered) checkManualAnswer();
+                    else nextQuestion();
                 } else if (e.key === ' ' && answered) {
                     e.preventDefault();
                     nextQuestion();
                 }
             });
+
+            await initFirebaseCloud();
         };
+
+        function safeJsonParse(value, fallback) {
+            try { return value ? JSON.parse(value) : fallback; }
+            catch (e) { return fallback; }
+        }
+
+        function firebaseConfigured() {
+            return FIREBASE_CONFIG &&
+                FIREBASE_CONFIG.apiKey && !FIREBASE_CONFIG.apiKey.startsWith('YOUR_') &&
+                FIREBASE_CONFIG.projectId && !FIREBASE_CONFIG.projectId.startsWith('YOUR_');
+        }
+
+        async function initFirebaseCloud() {
+            const status = document.getElementById('sync-status');
+            if (!firebaseConfigured()) {
+                status.innerText = 'Chưa cấu hình Cloud';
+                status.className = 'text-[9px] font-bold text-orange-500 uppercase';
+                document.getElementById('btn-google-login').classList.remove('hidden');
+                document.getElementById('btn-google-login').disabled = true;
+                return;
+            }
+
+            try {
+                if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
+                const auth = firebase.auth();
+                firebase.firestore();
+                firestoreReady = true;
+                status.innerText = 'Đang xác thực...';
+
+                auth.onAuthStateChanged(async (user) => {
+                    currentUser = user || null;
+                    updateAuthUI();
+                    if (user) {
+                        await loadCloudVocabulary();
+                        startRealtimeVocabularySync();
+                    } else {
+                        stopRealtimeVocabularySync();
+                        status.innerText = 'Chưa đăng nhập';
+                        status.className = 'text-[9px] font-bold text-orange-500 uppercase';
+                    }
+                });
+
+                await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+            } catch (error) {
+                console.error('Firebase init error:', error);
+                status.innerText = 'Cloud lỗi';
+                status.className = 'text-[9px] font-bold text-red-500 uppercase';
+            }
+        }
+
+        function updateAuthUI() {
+            const login = document.getElementById('btn-google-login');
+            const logout = document.getElementById('btn-google-logout');
+            const status = document.getElementById('sync-status');
+            if (!login || !logout) return;
+            if (currentUser) {
+                login.classList.add('hidden');
+                logout.classList.remove('hidden');
+                status.innerText = '☁ ' + (currentUser.email || 'Đã đồng bộ');
+                status.className = 'text-[9px] font-bold text-emerald-500 uppercase max-w-[150px] truncate';
+            } else {
+                login.classList.remove('hidden');
+                logout.classList.add('hidden');
+            }
+        }
+
+        async function signInWithGoogle() {
+            if (!firestoreReady) { alert('Bạn chưa cấu hình Firebase trong code.'); return; }
+            try {
+                const provider = new firebase.auth.GoogleAuthProvider();
+                await firebase.auth().signInWithPopup(provider);
+            } catch (error) {
+                console.error(error);
+                alert('Đăng nhập Google thất bại: ' + (error.message || error.code));
+            }
+        }
+
+        async function signOutGoogle() {
+            if (!confirm('Đăng xuất tài khoản Google trên thiết bị này?')) return;
+            await firebase.auth().signOut();
+        }
+
+        function localSaveVocabulary() {
+            persistVocabulary();
+        }
+
+        function normalizeVocabulary(items) {
+            return (Array.isArray(items) ? items : []).filter(x => x && x.h).map(x => ({
+                h: String(x.h || '').trim(),
+                p: String(x.p || '').trim(),
+                m: String(x.m || '').trim(),
+                learned: !!x.learned,
+                favorite: !!x.favorite,
+                showDetail: !!x.showDetail
+            }));
+        }
+
+        function mergeVocabulary(localItems, cloudItems) {
+            const map = new Map();
+            normalizeVocabulary(localItems).forEach(x => map.set(x.h, x));
+            normalizeVocabulary(cloudItems).forEach(x => {
+                const old = map.get(x.h);
+                // Cloud is authoritative for existing words; local-only words are retained.
+                map.set(x.h, old ? { ...x, learned: x.learned, favorite: x.favorite, showDetail: x.showDetail || old.showDetail } : x);
+            });
+            return Array.from(map.values());
+        }
+
+        async function loadCloudVocabulary() {
+            if (!currentUser || !firestoreReady) return;
+            isCloudLoading = true;
+            const status = document.getElementById('sync-status');
+            status.innerText = '☁ Đang tải...';
+            try {
+                const ref = firebase.firestore().collection('users').doc(currentUser.uid).collection('app').doc('vocabulary');
+                const snap = await ref.get();
+                if (snap.exists) {
+                    const cloudData = normalizeVocabulary(snap.data().items || []);
+                    vocabulary = mergeVocabulary(vocabulary, cloudData);
+                    localSaveVocabulary();
+                    renderTable();
+                } else if (vocabulary.length > 0) {
+                    await saveVocabularyToCloud();
+                }
+                status.innerText = '☁ ' + (currentUser.email || 'Đã đồng bộ');
+                status.className = 'text-[9px] font-bold text-emerald-500 uppercase max-w-[150px] truncate';
+            } catch (error) {
+                console.error('Cloud load error:', error);
+                status.innerText = 'Offline';
+                status.className = 'text-[9px] font-bold text-orange-500 uppercase';
+            } finally {
+                isCloudLoading = false;
+            }
+        }
+
+        function startRealtimeVocabularySync() {
+            stopRealtimeVocabularySync();
+            if (!currentUser || !firestoreReady) return;
+            const ref = firebase.firestore().collection('users').doc(currentUser.uid).collection('app').doc('vocabulary');
+            unsubscribeVocabulary = ref.onSnapshot((snap) => {
+                if (!snap.exists || isCloudLoading) return;
+                const incoming = normalizeVocabulary(snap.data().items || []);
+                if (!incoming.length && vocabulary.length) return;
+                vocabulary = incoming;
+                localSaveVocabulary();
+                renderTable();
+                updateFavoriteCountHint();
+                if (quizPool[currentIndex]) updateCurrentFavoriteButtons(vocabulary.find(v => v.h === quizPool[currentIndex].h));
+                const status = document.getElementById('sync-status');
+                if (status && currentUser) {
+                    status.innerText = '☁ Đã đồng bộ';
+                    status.className = 'text-[9px] font-bold text-emerald-500 uppercase';
+                }
+            }, (error) => {
+                console.error('Realtime sync error:', error);
+            });
+        }
+
+        function stopRealtimeVocabularySync() {
+            if (typeof unsubscribeVocabulary === 'function') {
+                unsubscribeVocabulary();
+                unsubscribeVocabulary = null;
+            }
+        }
+
+        async function saveVocabularyToCloud() {
+            if (!currentUser || !firestoreReady || isCloudLoading) return;
+            try {
+                const clean = normalizeVocabulary(vocabulary);
+                await firebase.firestore().collection('users').doc(currentUser.uid).collection('app').doc('vocabulary').set({
+                    items: clean,
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                lastCloudWriteAt = Date.now();
+                const status = document.getElementById('sync-status');
+                status.innerText = '☁ Đã đồng bộ';
+                status.className = 'text-[9px] font-bold text-emerald-500 uppercase';
+            } catch (error) {
+                console.error('Cloud save error:', error);
+                const status = document.getElementById('sync-status');
+                status.innerText = '⚠ Lưu Cloud lỗi';
+                status.className = 'text-[9px] font-bold text-red-500 uppercase';
+            }
+        }
+
+        function persistVocabulary() {
+            localSaveVocabulary();
+            clearTimeout(cloudSyncTimer);
+            cloudSyncTimer = setTimeout(saveVocabularyToCloud, 250);
+        }
 
         function loadAvailableVoices() {
             if (!('speechSynthesis' in window)) return;
@@ -1205,7 +1457,7 @@
                 }
             }
 
-            return { h, p, m, learned: false };
+            return { h, p, m, learned: false, favorite: false, showDetail: false };
         }
 
         function handleExcelUpload(event) {
@@ -1295,8 +1547,12 @@
                 });
             }
 
-            vocabulary = newVocab;
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(vocabulary));
+            const oldMap = new Map(vocabulary.map(item => [item.h, item]));
+            vocabulary = newVocab.map(item => {
+                const old = oldMap.get(item.h);
+                return { ...item, learned: old ? !!old.learned : false, favorite: old ? !!old.favorite : false, showDetail: old ? !!old.showDetail : false };
+            });
+            persistVocabulary();
             renderTable();
             alert(`Đã cập nhật ${newVocab.length} từ vựng!`);
         }
@@ -1522,6 +1778,9 @@
                     <td class="text-center">
                         <input type="checkbox" class="custom-checkbox" ${item.learned ? 'checked' : ''} onchange="toggleLearned(${index})">
                     </td>
+                    <td class="text-center">
+                        <button onclick="toggleFavorite(${index})" class="text-xl leading-none ${item.favorite ? 'text-yellow-400' : 'text-slate-300 dark:text-slate-600'}" title="${item.favorite ? 'Bỏ yêu thích' : 'Thêm yêu thích'}">${item.favorite ? '★' : '☆'}</button>
+                    </td>
                 `;
 
                 tbody.appendChild(tr);
@@ -1530,8 +1789,48 @@
 
         function toggleLearned(index) {
             vocabulary[index].learned = !vocabulary[index].learned;
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(vocabulary));
+            persistVocabulary();
             renderTable();
+        }
+
+        function isFavorite(item) { return !!(item && item.favorite); }
+
+        function toggleFavorite(index) {
+            if (!vocabulary[index]) return;
+            vocabulary[index].favorite = !vocabulary[index].favorite;
+            persistVocabulary();
+            renderTable();
+            updateFavoriteCountHint();
+            updateCurrentFavoriteButtons(vocabulary[index]);
+        }
+
+        function toggleCurrentFavorite() {
+            const item = quizPool[currentIndex];
+            if (!item) return;
+            const main = vocabulary.find(v => v.h === item.h);
+            if (!main) return;
+            main.favorite = !main.favorite;
+            item.favorite = main.favorite;
+            persistVocabulary();
+            updateCurrentFavoriteButtons(main);
+            renderTable();
+            updateFavoriteCountHint();
+        }
+
+        function updateCurrentFavoriteButtons(item) {
+            const buttons = [document.getElementById('quiz-favorite-btn'), document.getElementById('flash-favorite-btn')];
+            buttons.forEach(btn => {
+                if (!btn) return;
+                btn.innerText = item && item.favorite ? '★' : '☆';
+                btn.classList.toggle('text-yellow-400', !!(item && item.favorite));
+                btn.classList.toggle('text-slate-300', !(item && item.favorite));
+                btn.title = item && item.favorite ? 'Bỏ khỏi yêu thích' : 'Thêm vào yêu thích';
+            });
+        }
+
+        function updateFavoriteCountHint() {
+            const el = document.getElementById('favorite-count-hint');
+            if (el) el.innerText = `Hiện có ${vocabulary.filter(v => v.favorite).length} từ yêu thích.`;
         }
 
         function toggleHideMeaningPinyin() {
@@ -1620,14 +1919,20 @@
             document.getElementById('manual-modes').classList.toggle('hidden', feature !== 'manual');
         }
 
+        function updateQuestionSourceUI() {
+            updateFavoriteCountHint();
+        }
+
         function setMaxQuestions() {
-            const activeVocab = vocabulary.filter(v => !v.learned);
+            const source = document.querySelector('input[name="q-source"]:checked')?.value || 'active';
+            const activeVocab = source === 'favorite' ? vocabulary.filter(v => v.favorite) : vocabulary.filter(v => !v.learned);
             document.getElementById('q-count-input').value = activeVocab.length;
         }
 
         function startQuiz() {
-            const activeVocab = vocabulary.filter(v => !v.learned);
-            if (activeVocab.length < 2) { alert("Cần ít nhất 2 từ chưa thuộc!"); return; }
+            const source = document.querySelector('input[name="q-source"]:checked')?.value || 'active';
+            const activeVocab = source === 'favorite' ? vocabulary.filter(v => v.favorite) : vocabulary.filter(v => !v.learned);
+            if (activeVocab.length < 2) { alert(source === 'favorite' ? "Cần ít nhất 2 từ yêu thích!" : "Cần ít nhất 2 từ chưa thuộc!"); return; }
 
             const countInput = document.getElementById('q-count-input').value;
             const count = countInput ? parseInt(countInput) : activeVocab.length;
@@ -1657,6 +1962,7 @@
         function showQuestion() {
             answered = false;
             const item = quizPool[currentIndex];
+            updateCurrentFavoriteButtons(item);
             const qMain = document.getElementById('q-main-text');
             const qInfo = document.getElementById('q-info');
             const optionsDiv = document.getElementById('options');
@@ -1917,8 +2223,9 @@
         }
 
         function startFlashcards() {
-            const activeVocab = vocabulary.filter(v => !v.learned);
-            if (activeVocab.length === 0) { alert("Không có từ vựng!"); return; }
+            const source = document.querySelector('input[name="flash-source"]:checked')?.value || 'active';
+            const activeVocab = source === 'favorite' ? vocabulary.filter(v => v.favorite) : vocabulary.filter(v => !v.learned);
+            if (activeVocab.length === 0) { alert(source === 'favorite' ? "Chưa có từ yêu thích!" : "Không có từ vựng chưa thuộc!"); return; }
             quizPool = [...activeVocab].sort(() => 0.5 - Math.random());
             currentIndex = 0;
             document.getElementById('flashcard-setup').classList.add('hidden');
@@ -1928,6 +2235,7 @@
 
         function showFlashcard() {
             const item = quizPool[currentIndex];
+            updateCurrentFavoriteButtons(item);
             const inner = document.getElementById('flashcard-inner');
 
             document.getElementById('flash-progress').innerText = `THẺ ${currentIndex + 1}/${quizPool.length}`;
