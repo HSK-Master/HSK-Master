@@ -654,9 +654,7 @@
 <body class="p-4 md:p-8">
     <div class="max-w-2xl mx-auto mb-6 flex justify-between items-center">
         <div class="flex items-center gap-2">
-            <div class="bg-blue-600 text-white p-1.5 rounded-lg">
-                <i class="fa-solid fa-keyboard text-xs"></i>
-            </div>
+     
             <h1 class="font-bold text-base tracking-tight uppercase">HSK</h1>
         </div>
  
@@ -738,7 +736,9 @@
                         <p id="original-excel-preview" class="text-[10px] text-blue-500 mt-2 font-semibold"></p>
                     </div>
                     <button onclick="saveOriginalExcelToCloud()" class="w-full bg-blue-600 text-white px-8 py-3 rounded-xl text-xs font-bold hover:bg-blue-700 transition-all shadow-md uppercase">LƯU FILE GỐC LÊN CLOUD</button>
-                    <p class="text-[10px] text-orange-500 italic">* Lần đầu có thể upload trực tiếp. Muốn upload lại hoặc xóa file gốc bắt buộc mở khóa bằng mật khẩu <b>113</b>.</p>
+                    <p class="text-[10px] text-orange-500 italic">
+    * Lần đầu có thể upload trực tiếp. Muốn upload lại hoặc xóa file gốc bắt buộc mở khóa quản trị.
+</p>
                 </div>
 
                 <div class="pt-2 flex gap-3">
@@ -1440,7 +1440,7 @@ favorite:!!item.favorite, showDetail:!!item.showDetail,
             if(originalFileExists) {
                 const count=meta?.count ?? vocabulary.filter(v=>v.isOriginal).length;
                 status.innerText=`☁ File gốc đang lưu: ${count} từ${meta?.name ? ' — '+meta.name : ''}`;
-                if(unlock){unlock.disabled=false;unlock.innerText=originalFileUnlocked?'ĐÃ MỞ KHÓA':'🔒 MỞ KHÓA (mật khẩu 113)';}
+                if(unlock){unlock.disabled=false;unlock.innerText=originalFileUnlocked?'ĐÃ MỞ KHÓA':'🔒 MỞ KHÓA';}
                 if(input)input.disabled=!originalFileUnlocked;if(del)del.disabled=!originalFileUnlocked;
             } else {
                 status.innerText='Chưa có file gốc. Có thể upload file 2.000 từ đầu tiên.';
@@ -1466,7 +1466,7 @@ favorite:!!item.favorite, showDetail:!!item.showDetail,
         function handleExcelUpload(event) {
             const file=event.target.files[0]; if(!file)return;
             if(!currentUser){alert('Hãy đăng nhập Google trước.');event.target.value='';return;}
-            if(originalFileExists&&!originalFileUnlocked){alert('File gốc đã tồn tại. Phải mở khóa bằng mật khẩu 113 trước khi upload lại.');event.target.value='';return;}
+            if(originalFileExists&&!originalFileUnlocked){alert('File gốc đã tồn tại. Phải mở khóa bằng mật khẩu trước khi upload lại.');event.target.value='';return;}
             const reader=new FileReader();
             reader.onload=function(e){
                 try{
@@ -1485,7 +1485,7 @@ favorite:!!item.favorite, showDetail:!!item.showDetail,
         async function saveOriginalExcelToCloud() {
             if(!currentUser||!firestoreReady){alert('Hãy đăng nhập Google trước.');return;}
             if(!pendingOriginalExcel?.items?.length){alert('Hãy chọn file Excel gốc trước.');return;}
-            if(originalFileExists&&!originalFileUnlocked){alert('Phải mở khóa bằng mật khẩu 113 trước.');return;}
+            if(originalFileExists&&!originalFileUnlocked){alert('Phải mở khóa bằng mật khẩu trước.');return;}
             const map=new Map(); pendingOriginalExcel.items.forEach(x=>{if(!map.has(x.h))map.set(x.h,x);});
             const items=[...map.values()];
             if(originalFileExists&&!confirm(`Thay thế file gốc hiện tại bằng "${pendingOriginalExcel.fileName}" (${items.length} từ)? Trạng thái ⭐ của từ trùng sẽ được giữ lại.`))return;
@@ -1505,7 +1505,7 @@ favorite:!!item.favorite, showDetail:!!item.showDetail,
         async function deleteOriginalFile() {
             if(!currentUser||!firestoreReady){alert('Hãy đăng nhập Google trước.');return;}
             if(!originalFileExists){alert('Hiện không có file gốc.');return;}
-            if(!originalFileUnlocked){alert('Phải mở khóa bằng mật khẩu 113 trước khi xóa.');return;}
+            if(!originalFileUnlocked){alert('Phải mở khóa bằng mật khẩu trước khi xóa.');return;}
             const originals=vocabulary.filter(v=>v.isOriginal), count=originals.length;
             if(!confirm(`XÓA FILE GỐC và ${count} từ thuộc file gốc khỏi Cloud?\n\nCác từ bổ sung sẽ được giữ lại. Thao tác này không thể hoàn tác.`))return;
             setCloudStatus('☁ Đang xóa file gốc...','blue');
