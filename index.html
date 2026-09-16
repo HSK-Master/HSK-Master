@@ -173,18 +173,60 @@
         .custom-input.wrong-input { border-color: #ef4444 !important; background: #fef2f2 !important; color: #991b1b !important; }
         .dark .custom-input.wrong-input { background: #7f1d1d !important; color: #fef2f2 !important; }
 
-        .vocab-table { width: 100%; border-collapse: collapse; }
-        .vocab-table th { 
+        /* BẢNG TỪ VỰNG: bố cục gọn, không để cột Bài học chiếm dư thừa */
+        .vocab-table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+        }
+        .vocab-table th {
             background: var(--bg-body);
-            color: var(--text-muted); 
-            font-size: 11px; 
-            font-weight: 800; 
+            color: var(--text-muted);
+            font-size: 11px;
+            font-weight: 800;
             text-transform: uppercase;
-            padding: 14px 10px;
+            padding: 9px 8px;
             border-bottom: 2px solid var(--border-color);
             text-align: left;
+            line-height: 1.15;
         }
-        .vocab-table td { border-bottom: 1px solid var(--border-color); padding: 12px 10px; color: var(--text-main); position: relative; }
+        .vocab-table td {
+            border-bottom: 1px solid var(--border-color);
+            padding: 7px 8px;
+            color: var(--text-main);
+            position: relative;
+            vertical-align: middle;
+            line-height: 1.18;
+            overflow-wrap: anywhere;
+        }
+        .vocab-table .lesson-cell {
+            font-size: var(--table-font-size, 15px) !important;
+            font-weight: inherit !important;
+            line-height: 1.18;
+        }
+        .vocab-table .hanzi-cell { line-height: 1.08; }
+        .vocab-table .pinyin-cell,
+        .vocab-table .meaning-cell { line-height: 1.18; }
+        .vocab-table .favorite-table-btn {
+            display: inline-flex;
+            width: 30px;
+            height: 30px;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            line-height: 1;
+        }
+        .vocab-table .vocab-action-btn {
+            width: 32px;
+            height: 32px;
+            margin: 0 2px;
+        }
+        .vocab-table thead th:nth-child(1) { width: 11%; }
+        .vocab-table thead th:nth-child(2) { width: 19%; }
+        .vocab-table thead th:nth-child(3) { width: 20%; }
+        .vocab-table thead th:nth-child(4) { width: 37%; }
+        .vocab-table thead th:nth-child(5) { width: 6%; }
+        .vocab-table thead th:nth-child(6) { width: 7%; }
 
         .hidden { display: none !important; }
         .invisible { visibility: hidden; }
@@ -501,6 +543,21 @@
             max-width: 100% !important;
         }
 
+        body.phone-mode .vocab-table {
+            table-layout: fixed;
+            min-width: 650px;
+        }
+        body.phone-mode .vocab-table th,
+        body.phone-mode .vocab-table td {
+            padding: 6px 6px;
+        }
+        body.phone-mode .vocab-table thead th:nth-child(1) { width: 12%; }
+        body.phone-mode .vocab-table thead th:nth-child(2) { width: 18%; }
+        body.phone-mode .vocab-table thead th:nth-child(3) { width: 20%; }
+        body.phone-mode .vocab-table thead th:nth-child(4) { width: 34%; }
+        body.phone-mode .vocab-table thead th:nth-child(5) { width: 7%; }
+        body.phone-mode .vocab-table thead th:nth-child(6) { width: 9%; }
+
         body.phone-mode .option-grid {
             grid-template-columns: 1fr !important;
             gap: 10px !important;
@@ -757,7 +814,7 @@
                     <div>
                         <label class="text-[11px] font-bold text-custom-muted uppercase tracking-wider mb-1 block">DATA EDITOR</label>
                         <p class="text-[10px] text-custom-muted leading-relaxed">
-                            Nhập và chỉnh sửa từ vựng trực tiếp trên web.
+                            Nhập và chỉnh sửa từ vựng trực tiếp trên web. Không cần tạo hoặc upload Excel.
                         </p>
                     </div>
                     <span id="data-lock-status" class="text-[10px] font-bold text-orange-500 whitespace-nowrap">🔒 Đang khóa</span>
@@ -2099,42 +2156,130 @@ favorite:!!item.favorite, showDetail:!!item.showDetail,
         }
 
         function initTheme() {
-            if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-                document.documentElement.classList.add('dark');
-                document.getElementById('theme-icon').className = 'fa-solid fa-sun';
-            }
+            // Không lấy theme của hệ điều hành. Theme mặc định do preset thiết bị quyết định.
+            applyDevicePreset(getPreferredDeviceMode(), false);
         }
 
         function toggleDarkMode() {
             const isDark = document.documentElement.classList.toggle('dark');
-            document.getElementById('theme-icon').className = isDark ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+            const icon = document.getElementById('theme-icon');
+            if (icon) icon.className = isDark ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+        }
+
+        function getPreferredDeviceMode() {
+            return window.innerWidth <= 700 ? 'phone' : 'desktop';
+        }
+
+        function applyDevicePreset(mode, rerender = true) {
+            deviceMode = mode === 'phone' ? 'phone' : 'desktop';
+            const isPhone = deviceMode === 'phone';
+
+            if (isPhone) {
+                // PRESET ĐIỆN THOẠI
+                colors = { hanzi: '#6e6e6e', pinyin: '#6e6e6e', meaning: '#6e6e6e' };
+                weights = { hanzi: 250, pinyin: 250, meaning: 250 };
+                pageZoom = 65;
+                qFontSize = 80;
+                aFontSize = 28;
+                ansFontSize = 25;
+                flashFrontSize = 85;
+                flashBackSize = 35;
+                timeFront = 3;
+                timeBack = 5;
+                zhVolume = 100;
+                vnVolume = 50;
+                document.documentElement.classList.add('dark');
+            } else {
+                // PRESET MÁY TÍNH
+                colors = { hanzi: '#f01414', pinyin: '#14aa14', meaning: '#1464aa' };
+                weights = { hanzi: 200, pinyin: 200, meaning: 200 };
+                pageZoom = 135;
+                qFontSize = 80;
+                aFontSize = 25;
+                ansFontSize = 25;
+                flashFrontSize = 135;
+                flashBackSize = 40;
+                timeFront = 3;
+                timeBack = 5;
+                zhVolume = 100;
+                vnVolume = 50;
+                document.documentElement.classList.remove('dark');
+            }
+
+            document.body.classList.toggle('phone-mode', isPhone);
+            updateDeviceModeUI();
+            syncAllSettingControls();
+            applyColorStyles();
+            if (rerender) {
+                renderTable();
+                if (currentActiveTab === 'quiz' && quizPool.length > 0 && !document.getElementById('quiz-active')?.classList.contains('hidden')) {
+                    showQuestion();
+                }
+                if (currentActiveTab === 'flashcard' && quizPool.length > 0 && !document.getElementById('flashcard-active')?.classList.contains('hidden')) {
+                    showFlashcard();
+                }
+            }
+        }
+
+        function syncAllSettingControls() {
+            const setValue = (id, value, suffix='') => {
+                const el = document.getElementById(id);
+                if (el) el.value = value;
+                const valEl = document.getElementById(id.replace('-slider','-val'));
+                if (valEl) valEl.innerText = value + suffix;
+            };
+
+            setValue('table-font-size-slider', tableFontSize, 'px');
+            setValue('page-zoom-slider', pageZoom, '%');
+            setValue('weight-hanzi-slider', weights.hanzi);
+            setValue('weight-pinyin-slider', weights.pinyin);
+            setValue('weight-meaning-slider', weights.meaning);
+            setValue('q-font-size-slider', qFontSize, 'px');
+            setValue('a-font-size-slider', aFontSize, 'px');
+            setValue('ans-font-size-slider', ansFontSize, 'px');
+
+            const flashFront = document.querySelector('input[oninput="updateFlashFontSize(\'front\', this.value)"]');
+            const flashBack = document.querySelector('input[oninput="updateFlashFontSize(\'back\', this.value)"]');
+            if (flashFront) flashFront.value = flashFrontSize;
+            if (flashBack) flashBack.value = flashBackSize;
+            const frontLabel = document.getElementById('flash-front-val');
+            const backLabel = document.getElementById('flash-back-val');
+            if (frontLabel) frontLabel.innerText = flashFrontSize;
+            if (backLabel) backLabel.innerText = flashBackSize;
+
+            const tf = document.getElementById('time-front-slider');
+            const tb = document.getElementById('time-back-slider');
+            if (tf) tf.value = timeFront;
+            if (tb) tb.value = timeBack;
+            const tfv = document.getElementById('time-front-val');
+            const tbv = document.getElementById('time-back-val');
+            if (tfv) tfv.innerText = timeFront;
+            if (tbv) tbv.innerText = timeBack;
+
+            const zh = document.getElementById('zh-volume-slider');
+            const vn = document.getElementById('vn-volume-slider');
+            if (zh) zh.value = zhVolume;
+            if (vn) vn.value = vnVolume;
+            const zhv = document.getElementById('zh-volume-val');
+            const vnv = document.getElementById('vn-volume-val');
+            if (zhv) zhv.innerText = zhVolume + '%';
+            if (vnv) vnv.innerText = vnVolume + '%';
+
+            const themeIcon = document.getElementById('theme-icon');
+            if (themeIcon) themeIcon.className = document.documentElement.classList.contains('dark') ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+            document.documentElement.style.setProperty('--table-font-size', tableFontSize + 'px');
+            document.body.style.zoom = pageZoom + '%';
+            const zoomLabel = document.getElementById('page-zoom-val');
+            if (zoomLabel) zoomLabel.innerText = pageZoom + '%';
         }
 
         function initDeviceMode() {
-            deviceMode = 'desktop';
-            document.body.classList.toggle('phone-mode', false);
-            updateDeviceModeUI();
+            applyDevicePreset(getPreferredDeviceMode(), false);
         }
 
         function toggleDeviceMode() {
             stopAuto();
-
-            deviceMode = deviceMode === 'desktop' ? 'phone' : 'desktop';
-            document.body.classList.toggle('phone-mode', deviceMode === 'phone');
-            updateDeviceModeUI();
-
-            if (currentActiveTab === 'flashcard' &&
-                !document.getElementById('flashcard-active').classList.contains('hidden') &&
-                quizPool.length > 0) {
-                showFlashcard();
-            }
-
-            if (currentActiveTab === 'quiz' &&
-                !document.getElementById('quiz-active').classList.contains('hidden') &&
-                quizPool.length > 0 &&
-                currentIndex < quizPool.length) {
-                showQuestion();
-            }
+            applyDevicePreset(deviceMode === 'desktop' ? 'phone' : 'desktop', true);
         }
 
         function updateDeviceModeUI() {
@@ -2174,15 +2319,9 @@ favorite:!!item.favorite, showDetail:!!item.showDetail,
         function initDisplayControls() {
             initColors();
             initZoom();
-            const tableSlider = document.getElementById('table-font-size-slider');
-            if (tableSlider) { tableSlider.value = tableFontSize; updateTableFontSize(tableFontSize); }
-            ['hanzi','pinyin','meaning'].forEach(type => {
-                const slider = document.getElementById(`weight-${type}-slider`);
-                if (slider) slider.value = weights[type];
-                const label = document.getElementById(`weight-${type}-val`);
-                if (label) label.innerText = weights[type];
-            });
+            syncAllSettingControls();
             applyColorStyles();
+            initAudioSettings();
         }
 
         function updatePageZoom(val) {
@@ -2221,9 +2360,9 @@ favorite:!!item.favorite, showDetail:!!item.showDetail,
                     color: ${colors.pinyin} !important; 
                     font-weight: ${weights.pinyin} !important; 
                 }
-                .meaning-cell, .text-color-meaning, .q-meaning, #q-main-text.text-color-meaning, #flash-m { 
-                    color: ${colors.meaning} !important; 
-                    font-weight: ${weights.meaning} !important; 
+                .meaning-cell, .lesson-cell, .text-color-meaning, .q-meaning, #q-main-text.text-color-meaning, #flash-m {
+                    color: ${colors.meaning} !important;
+                    font-weight: ${weights.meaning} !important;
                 }
 
                 /* Màu đáp án trắc nghiệm phải lấy đúng màu đã cài đặt:
@@ -2292,10 +2431,10 @@ favorite:!!item.favorite, showDetail:!!item.showDetail,
                 const showDetail = !hideMeaningPinyin || item.showDetail === true;
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td class="lesson-cell" style="font-size:${Math.max(11, Number(tableFontSize) * .8)}px; font-weight:700;">${escapeHtml(item.lesson || '-')}</td>
-                    <td class="hanzi-cell chinese-font" style="font-size:${Number(tableFontSize) * 1.7}px; line-height:1.2; cursor:pointer;" onclick="handleHanziClick(${index})">${escapeHtml(item.h)}</td>
-                    <td class="pinyin-cell" style="font-size:${Number(tableFontSize)}px; line-height:1.2; ${showDetail ? '' : 'color:transparent;'}">${showDetail ? escapeHtml(item.p) : '-'}</td>
-                    <td class="meaning-cell" style="font-size:${Number(tableFontSize)}px; line-height:1.2; ${showDetail ? '' : 'color:transparent;'}">${showDetail ? escapeHtml(item.m) : '-'}</td>
+                    <td class="lesson-cell text-color-meaning">${escapeHtml(item.lesson || '-')}</td>
+                    <td class="hanzi-cell chinese-font" style="font-size:${Number(tableFontSize) * 1.7}px; cursor:pointer;" onclick="handleHanziClick(${index})">${escapeHtml(item.h)}</td>
+                    <td class="pinyin-cell" style="font-size:${Number(tableFontSize)}px; ${showDetail ? '' : 'color:transparent;'}">${showDetail ? escapeHtml(item.p) : '-'}</td>
+                    <td class="meaning-cell" style="font-size:${Number(tableFontSize)}px; ${showDetail ? '' : 'color:transparent;'}">${showDetail ? escapeHtml(item.m) : '-'}</td>
                     <td class="text-center">
                         <button type="button" onclick="toggleFavorite(${index}); return false;" class="favorite-table-btn ${item.favorite ? 'is-favorite' : ''}" style="color:${item.favorite ? '#facc15' : '#cbd5e1'} !important;-webkit-text-fill-color:${item.favorite ? '#facc15' : '#cbd5e1'} !important;" title="${item.favorite ? 'Bỏ yêu thích' : 'Thêm yêu thích'}">${item.favorite ? '★' : '☆'}</button>
                     </td>
@@ -2639,6 +2778,37 @@ favorite:!!item.favorite, showDetail:!!item.showDetail,
             showQuestion();
         }
 
+        // =========================================================
+        // PHÍM TẮT TỰ LUẬN
+        // Enter / Space: nộp đáp án; sau khi trả lời: sang câu tiếp theo.
+        // Dùng capture để vẫn hoạt động khi ô input đang focus.
+        // =========================================================
+        document.addEventListener('keydown', function handleManualQuizKeys(event) {
+            if (currentActiveTab !== 'quiz' || currentFeature !== 'manual') return;
+
+            const quizActive = document.getElementById('quiz-active');
+            const manualArea = document.getElementById('manual-input-area');
+            const userInput = document.getElementById('user-answer');
+            if (!quizActive || quizActive.classList.contains('hidden') ||
+                !manualArea || manualArea.classList.contains('hidden') || !userInput) return;
+
+            // Không can thiệp khi modal/dialog hoặc vùng nhập khác đang hoạt động.
+            const target = event.target;
+            if (target && (target.tagName === 'TEXTAREA' || target.tagName === 'SELECT')) return;
+
+            if (event.key !== 'Enter' && event.key !== ' ') return;
+
+            event.preventDefault();
+            event.stopPropagation();
+
+            if (!answered) {
+                if (document.activeElement !== userInput) userInput.focus();
+                checkManualAnswer();
+            } else {
+                nextQuestion();
+            }
+        }, true);
+
         function showQuestion() {
             answered = false;
             const item = quizPool[currentIndex];
@@ -2705,7 +2875,11 @@ favorite:!!item.favorite, showDetail:!!item.showDetail,
                 });
             } else {
                 manualArea.classList.remove('hidden');
-                setTimeout(() => userInp.focus(), 100);
+                userInp.disabled = false;
+                setTimeout(() => {
+                    userInp.focus();
+                    userInp.select();
+                }, 100);
             }
         }
 
@@ -2738,12 +2912,15 @@ favorite:!!item.favorite, showDetail:!!item.showDetail,
 
         function checkManualAnswer() {
             if (answered) return;
-            const userAns = document.getElementById('user-answer').value.trim();
-            if (!userAns) return;
+            const inputEl = document.getElementById('user-answer');
+            const userAns = inputEl.value.trim();
+            if (!userAns) {
+                inputEl.focus();
+                return;
+            }
 
             answered = true;
             const correctItem = quizPool[currentIndex];
-            const inputEl = document.getElementById('user-answer');
             totalAttempts++;
 
             if (userAns === correctItem.h) {
@@ -3123,8 +3300,10 @@ favorite:!!item.favorite, showDetail:!!item.showDetail,
         }
 
         function updateTableFontSize(val) {
-            tableFontSize = val;
-            document.getElementById('table-font-size-val').innerText = val + 'px';
+            tableFontSize = Number(val);
+            const label = document.getElementById('table-font-size-val');
+            if (label) label.innerText = tableFontSize + 'px';
+            document.documentElement.style.setProperty('--table-font-size', tableFontSize + 'px');
             renderTable();
         }
 
@@ -3173,6 +3352,8 @@ favorite:!!item.favorite, showDetail:!!item.showDetail,
             updateDataLockUI();
             updateQuestionSourceUI();
             updateFlashSourceUI();
+            tableFontSize = 15;
+            initDeviceMode();
             initDisplayControls();
             initFirebaseCloud();
         });
