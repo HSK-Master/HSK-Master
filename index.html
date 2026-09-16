@@ -596,20 +596,45 @@
             max-width: 100% !important;
         }
 
+        /* BẢNG TỪ VỰNG TRÊN ĐIỆN THOẠI:
+           luôn vừa đúng chiều ngang khung web, không tạo thanh cuộn ngang.
+           Cột EDIT được chừa đủ chỗ cho cả 2 nút Sửa + Xóa. */
         body.phone-mode .vocab-table {
             table-layout: fixed;
-            min-width: 650px;
+            width: 100% !important;
+            min-width: 0 !important;
+            max-width: 100% !important;
         }
         body.phone-mode .vocab-table th,
         body.phone-mode .vocab-table td {
-            padding: 6px 6px;
+            padding: 6px 4px;
+            box-sizing: border-box;
         }
-        body.phone-mode .vocab-table thead th:nth-child(1) { width: 12%; }
-        body.phone-mode .vocab-table thead th:nth-child(2) { width: 18%; }
-        body.phone-mode .vocab-table thead th:nth-child(3) { width: 20%; }
-        body.phone-mode .vocab-table thead th:nth-child(4) { width: 34%; }
-        body.phone-mode .vocab-table thead th:nth-child(5) { width: 7%; }
-        body.phone-mode .vocab-table thead th:nth-child(6) { width: 9%; }
+        body.phone-mode .vocab-table th:nth-child(1),
+        body.phone-mode .vocab-table td:nth-child(1) { width: 12%; }
+        body.phone-mode .vocab-table th:nth-child(2),
+        body.phone-mode .vocab-table td:nth-child(2) { width: 16%; }
+        body.phone-mode .vocab-table th:nth-child(3),
+        body.phone-mode .vocab-table td:nth-child(3) { width: 18%; }
+        body.phone-mode .vocab-table th:nth-child(4),
+        body.phone-mode .vocab-table td:nth-child(4) { width: 34%; }
+        body.phone-mode .vocab-table th:nth-child(5),
+        body.phone-mode .vocab-table td:nth-child(5) { width: 8%; }
+        body.phone-mode .vocab-table th:nth-child(6),
+        body.phone-mode .vocab-table td:nth-child(6) { width: 12%; }
+
+        /* 2 nút EDIT/XÓA phải nằm gọn trong cột, không đẩy rộng bảng. */
+        body.phone-mode .vocab-table .vocab-action-btn {
+            width: 26px !important;
+            height: 32px !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+        body.phone-mode .vocab-table .favorite-table-btn {
+            width: 26px !important;
+            height: 30px !important;
+            font-size: 20px !important;
+        }
 
         body.phone-mode .option-grid {
             grid-template-columns: 1fr !important;
