@@ -1301,7 +1301,7 @@ H5 - 17	迅速 - xùnsù - Nhanh chóng	yes"></textarea>
                         <div class="bg-custom-card p-5 rounded-2xl border shadow-sm">
                             <label class="text-[10px] font-bold text-custom-muted uppercase mb-2 block">Gõ Hán tự đáp án:</label>
                             <input type="text" id="user-answer" class="custom-input chinese-font text-center" placeholder="..." autocomplete="off">
-                            <p id="input-hint" class="text-[10px] text-blue-500 mt-3 italic text-center font-medium">Nhấn Enter để kiểm tra / Enter or Space để chuyển câu</p>
+                            <p id="input-hint" class="text-[10px] text-blue-500 mt-3 italic text-center font-medium">Nhấn Enter / Space để hiện đáp án; nhấn lần nữa để chuyển câu</p>
                         </div>
                     </div>
 
@@ -2334,7 +2334,7 @@ favorite:!!item.favorite, showDetail:!!item.showDetail,
 
             if (isPhone) {
                 // PRESET ĐIỆN THOẠI
-                colors = { hanzi: '#6e6e6e', pinyin: '#6e6e6e', meaning: '#6e6e6e' };
+                colors = { hanzi: '#828282', pinyin: '#828282', meaning: '#828282' };
                 weights = { hanzi: 250, pinyin: 250, meaning: 250 };
                 pageZoom = 65;
                 qFontSize = 80;
@@ -3523,32 +3523,6 @@ favorite:!!item.favorite, showDetail:!!item.showDetail,
                 document.getElementById('time-back-val').innerText = val;
             }
         }
-
-        // =========================================================
-        // PHÍM TẮT TỰ LUẬN: Enter / Space
-        // =========================================================
-        document.addEventListener('keydown', function(e) {
-            if (currentActiveTab !== 'quiz' || currentFeature !== 'manual') return;
-            const quizActive = document.getElementById('quiz-active');
-            if (!quizActive || quizActive.classList.contains('hidden')) return;
-            if (e.key !== 'Enter' && e.key !== ' ') return;
-
-            const target = e.target;
-            const isTypingField = target && (
-                target.id === 'user-answer' ||
-                target.tagName === 'INPUT' ||
-                target.tagName === 'TEXTAREA'
-            );
-
-            e.preventDefault();
-            e.stopPropagation();
-
-            if (!answered) {
-                checkManualAnswer();
-            } else {
-                nextQuestion();
-            }
-        }, true);
 
         // Khởi động Firebase/Auth sau khi toàn bộ giao diện đã sẵn sàng.
         // Dữ liệu từ vựng không lưu trên thiết bị; Cloud là nguồn dữ liệu duy nhất.
