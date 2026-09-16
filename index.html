@@ -400,7 +400,7 @@
         .data-entry-input:focus { border-color: #3b82f6; box-shadow: 0 0 0 2px rgba(59,130,246,.12); }
         .data-entry-row td { padding: 4px; }
         .data-paste-textarea {
-            display: block; width: 100%; min-height: 200px; height: 200px;
+            display: block; width: 100%; min-height: 120px; height: 120px;
             box-sizing: border-box; resize: vertical;
             border: 1px solid var(--border-color);
             border-radius: 14px; background: var(--bg-card); color: var(--text-main);
@@ -411,7 +411,45 @@
 
         .text-custom-muted { color: var(--text-muted); }
 
-        .study-lesson-list { scrollbar-width: thin; }
+        /* Bố cục bài học: 4 lựa chọn / hàng, hỗ trợ chọn nhiều bài */
+        .study-lesson-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 8px;
+        }
+        .study-lesson-grid .radio-box {
+            min-height: 42px;
+            padding: 8px 6px;
+            font-size: 11px;
+            line-height: 1.2;
+            text-align: center;
+        }
+        .study-lesson-grid input[type="checkbox"]:checked + .radio-box {
+            background: #3b82f6;
+            color: white;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59,130,246,.18);
+        }
+        @media (max-width: 700px) {
+            .study-lesson-grid { gap: 6px; }
+            .study-lesson-grid .radio-box { min-height: 38px; padding: 7px 4px; font-size: 10px; }
+        }
+        /* Bảng DATA gọn hơn khi cỡ chữ thường dùng là 15px */
+        .vocab-table { table-layout: fixed; width: 100%; }
+        .vocab-table th, .vocab-table td { vertical-align: middle; }
+        .vocab-table th { padding: 8px 7px; }
+        .vocab-table td { padding: 7px 7px; line-height: 1.25; }
+        .vocab-table th:nth-child(1), .vocab-table td:nth-child(1) { width: 11%; }
+        .vocab-table th:nth-child(2), .vocab-table td:nth-child(2) { width: 18%; }
+        .vocab-table th:nth-child(3), .vocab-table td:nth-child(3) { width: 18%; }
+        .vocab-table th:nth-child(4), .vocab-table td:nth-child(4) { width: 39%; }
+        .vocab-table th:nth-child(5), .vocab-table td:nth-child(5) { width: 5%; }
+        .vocab-table th:nth-child(6), .vocab-table td:nth-child(6) { width: 9%; }
+        .lesson-cell { overflow-wrap: anywhere; }
+        .pinyin-cell, .meaning-cell { overflow-wrap: anywhere; }
+        .vocab-action-btn { width: 30px !important; height: 30px !important; }
+
+.study-lesson-list { scrollbar-width: thin; }
         #quiz-lesson-list, #flash-lesson-list { scrollbar-width: thin; }
         .flashcard-container > .favorite-star-btn {
             position: absolute !important;
@@ -770,19 +808,9 @@
                 <button id="btn-google-login" onclick="signInWithGoogle()" class="hidden bg-blue-600 text-white px-3 py-2 rounded-lg text-[10px] font-bold uppercase">
                     <i class="fa-brands fa-google mr-1"></i> Đăng nhập Google
                 </button>
-                <button id="btn-google-logout" onclick="signOutGoogle()" class="hidden bg-slate-100 dark:bg-slate-800 px-3 py-2 rounded-lg text-[10px] font-bold">Đăng xuất</button>
+                <button id="btn-google-logout" onclick="signOutGoogle()" class="hidden icon-btn-40" title="Đăng xuất" aria-label="Đăng xuất"><i class="fa-solid fa-right-from-bracket"></i></button>
             </div>
             <div id="global-audio-controls" class="hidden flex items-center gap-2">
-                <!-- Dropdown Chọn giọng phát tiếng Việt (Kích thước 40x40px với icon fa-language) -->
-                <div id="wrapper-vn-voice-select" class="select-vn-voice-box icon-btn-40" title="Chọn giọng đọc tiếng Việt">
-                    <select id="vn-voice-select" onchange="changeVnVoice(this.value)">
-                        <option value="">Giọng Mặc định</option>
-                    </select>
-                    <div class="icon-display">
-                        <i class="fa-solid fa-language text-sm"></i>
-                    </div>
-                </div>
-
                 <button id="btn-speech-vn-toggle" onclick="toggleVnSpeech()" class="icon-btn-40" title="Bật/Tắt đọc tiếng Việt khi lật thẻ">
                     <span class="font-black text-xs">VN</span>
                 </button>
@@ -912,9 +940,9 @@ H5 - 17	迅速 - xùnsù - Nhanh chóng	yes"></textarea>
                 <div class="pt-4 border-t border-slate-200 dark:border-slate-800">
                     <label class="text-[11px] font-bold text-custom-muted uppercase tracking-wider mb-3 block">Màu sắc Hán tự / Pinyin / Nghĩa</label>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                        <div class="color-picker-container"><input type="color" id="color-hanzi" value="#ef4444" oninput="updateColors()" class="w-8 h-8 p-0 border-none rounded bg-transparent cursor-pointer"><label class="text-[10px] font-bold text-custom-muted uppercase">Hán tự</label></div>
-                        <div class="color-picker-container"><input type="color" id="color-pinyin" value="#22c55e" oninput="updateColors()" class="w-8 h-8 p-0 border-none rounded bg-transparent cursor-pointer"><label class="text-[10px] font-bold text-custom-muted uppercase">Pinyin</label></div>
-                        <div class="color-picker-container"><input type="color" id="color-meaning" value="#3b82f6" oninput="updateColors()" class="w-8 h-8 p-0 border-none rounded bg-transparent cursor-pointer"><label class="text-[10px] font-bold text-custom-muted uppercase">Nghĩa</label></div>
+                        <div class="color-picker-container"><input type="color" id="color-hanzi" value="#ef4444" oninput="updateColors()" class="w-6 h-6 p-0 border-none rounded bg-transparent cursor-pointer"><label class="text-[10px] font-bold text-custom-muted uppercase">Hán tự</label></div>
+                        <div class="color-picker-container"><input type="color" id="color-pinyin" value="#22c55e" oninput="updateColors()" class="w-6 h-6 p-0 border-none rounded bg-transparent cursor-pointer"><label class="text-[10px] font-bold text-custom-muted uppercase">Pinyin</label></div>
+                        <div class="color-picker-container"><input type="color" id="color-meaning" value="#3b82f6" oninput="updateColors()" class="w-6 h-6 p-0 border-none rounded bg-transparent cursor-pointer"><label class="text-[10px] font-bold text-custom-muted uppercase">Nghĩa</label></div>
                     </div>
                 </div>
             </div>
@@ -937,7 +965,7 @@ H5 - 17	迅速 - xùnsù - Nhanh chóng	yes"></textarea>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="vocab-table">
-                        <thead><tr><th class="w-1/5">Bài học</th><th class="w-1/5">Hán tự</th><th class="w-1/4">Pinyin</th><th>Nghĩa</th><th class="w-12 text-center">⭐</th><th class="w-20 text-center">QUẢN LÝ</th></tr></thead>
+                        <thead><tr><th class="w-1/5">Bài học</th><th class="w-1/5">Hán tự</th><th class="w-1/4">Pinyin</th><th>Nghĩa</th><th class="w-12 text-center">⭐</th><th class="w-20 text-center">EDIT</th></tr></thead>
                         <tbody id="vocab-list" class="text-sm"></tbody>
                     </table>
                 </div>
@@ -1066,7 +1094,7 @@ H5 - 17	迅速 - xùnsù - Nhanh chóng	yes"></textarea>
 
                     <div>
                         <label class="text-[11px] font-bold text-custom-muted uppercase tracking-wider mb-3 block">Bài học</label>
-                        <div id="quiz-lesson-list" class="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-48 overflow-y-auto pr-1"></div>
+                        <div id="quiz-lesson-list" class="study-lesson-grid max-h-48 overflow-y-auto pr-1"></div>
                         <p id="quiz-lesson-hint" class="text-[10px] text-custom-muted mt-2"></p>
                     </div>
 
@@ -1261,7 +1289,7 @@ H5 - 17	迅速 - xùnsù - Nhanh chóng	yes"></textarea>
 
                 <div>
                     <label class="text-[11px] font-bold text-custom-muted uppercase tracking-wider mb-3 block">Bài học</label>
-                    <div id="flash-lesson-list" class="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-48 overflow-y-auto pr-1"></div>
+                    <div id="flash-lesson-list" class="study-lesson-grid max-h-48 overflow-y-auto pr-1"></div>
                     <p id="flash-lesson-hint" class="text-[10px] text-custom-muted mt-2"></p>
                 </div>
 
@@ -1336,8 +1364,6 @@ H5 - 17	迅速 - xùnsù - Nhanh chóng	yes"></textarea>
         let zhVolume = 100;
         let vnVolume = 50;
         let isVnSpeechEnabled = false;
-        let selectedVnVoiceURI = "";
-        let availableVnVoices = [];
 
         // Trạng thái phiên/UI — chỉ tồn tại trong RAM, không lưu dữ liệu học tập trên máy.
         let quizPool = [];
@@ -1368,8 +1394,8 @@ H5 - 17	迅速 - xùnsù - Nhanh chóng	yes"></textarea>
         let tableSoundEnabled = true;
         let tableFilter = 'all';
         let selectedTableLesson = '__ALL__';
-        let selectedQuizLesson = '__ALL__';
-        let selectedFlashLesson = '__ALL__';
+        let selectedQuizLessons = [];
+        let selectedFlashLessons = [];
 
         function firebaseConfigured() {
             return FIREBASE_CONFIG &&
@@ -1683,7 +1709,7 @@ favorite:!!item.favorite, showDetail:!!item.showDetail,
                 dataFileUnlocked = true;
                 closeDataPasswordModal();
                 updateDataLockUI();
-                setCloudStatus('☁ DATA đã mở khóa', 'green');
+                setCloudStatus('☁ Đã đồng bộ', 'green');
             } else {
                 if (error) error.classList.remove('hidden');
                 if (input) { input.value = ''; input.focus(); }
@@ -1697,6 +1723,7 @@ favorite:!!item.favorite, showDetail:!!item.showDetail,
             closeDataEditors();
             closeVocabEditModal();
             updateDataLockUI();
+            if (currentUser && firestoreReady) setCloudStatus('☁ Đã đồng bộ', 'green');
         }
 
         function closeDeleteAllVocabulary() {
@@ -2654,19 +2681,14 @@ favorite:!!item.favorite, showDetail:!!item.showDetail,
             document.getElementById(`tab-${tabName}-btn`).classList.remove('text-custom-muted');
 
             const audioControls = document.getElementById('global-audio-controls');
-            const vnVoiceSelectBox = document.getElementById('wrapper-vn-voice-select');
             const vnSpeechToggleBtn = document.getElementById('btn-speech-vn-toggle');
 
             if (tabName === 'quiz') {
                 audioControls.classList.remove('hidden');
-                // Ẩn thanh chọn giọng VN và nút phát tiếng Việt ở Tab Luyện Tập
-                vnVoiceSelectBox.classList.add('hidden');
-                vnSpeechToggleBtn.classList.add('hidden');
+                if (vnSpeechToggleBtn) vnSpeechToggleBtn.classList.add('hidden');
             } else if (tabName === 'flashcard') {
                 audioControls.classList.remove('hidden');
-                // Hiện lại ở Tab Flashcard
-                vnVoiceSelectBox.classList.remove('hidden');
-                vnSpeechToggleBtn.classList.remove('hidden');
+                if (vnSpeechToggleBtn) vnSpeechToggleBtn.classList.remove('hidden');
             } else {
                 audioControls.classList.add('hidden');
             }
@@ -2685,72 +2707,106 @@ favorite:!!item.favorite, showDetail:!!item.showDetail,
 
         function renderLessonSelectors() {
             const lessons = getLessonList();
-            const render = (containerId, name, selected, setter, hintId) => {
+            const render = (containerId, name, selectedLessons, setter, hintId) => {
                 const box = document.getElementById(containerId);
                 if (!box) return;
-                const options = ['__ALL__', ...lessons];
-                if (!options.includes(selected)) selected = '__ALL__';
-                box.innerHTML = options.map((lesson, i) => {
-                    const checked = lesson === selected;
-                    const label = lesson === '__ALL__' ? 'Tất cả bài học' : `Bài ${lesson}`;
+                const selected = Array.isArray(selectedLessons) ? selectedLessons : [];
+                const allChecked = selected.length === 0;
+                const allLabel = `
+                    <label class="relative cursor-pointer">
+                        <input type="checkbox" value="__ALL__" ${allChecked ? 'checked' : ''} class="hidden" onchange="${setter}(this.value, this.checked)">
+                        <div class="radio-box">Tất cả bài học</div>
+                    </label>`;
+                const lessonHtml = lessons.map(lesson => {
+                    const checked = selected.includes(lesson);
+                    const safe = String(lesson).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
                     return `<label class="relative cursor-pointer">
-                        <input type="radio" name="${name}" value="${String(lesson).replace(/&/g,'&amp;').replace(/"/g,'&quot;')}" ${checked ? 'checked' : ''} class="hidden" onchange="${setter}(this.value)">
-                        <div class="radio-box text-[11px] ${checked ? 'ring-2 ring-blue-500 bg-blue-600 text-white border-blue-600' : ''}">${label}</div>
+                        <input type="checkbox" name="${name}" value="${safe}" ${checked ? 'checked' : ''} class="hidden" onchange="${setter}(this.value, this.checked)">
+                        <div class="radio-box">Bài ${escapeHtml(lesson)}</div>
                     </label>`;
                 }).join('');
+                box.innerHTML = allLabel + lessonHtml;
                 const hint = document.getElementById(hintId);
-                if (hint) hint.innerText = lessons.length ? `Có ${lessons.length} bài học trong dữ liệu Cloud.` : 'Chưa có thông tin bài học trong dữ liệu.';
+                if (hint) {
+                    if (!lessons.length) hint.innerText = 'Chưa có thông tin bài học trong dữ liệu.';
+                    else if (selected.length === 0) hint.innerText = `Đang chọn tất cả ${lessons.length} bài học.`;
+                    else hint.innerText = `Đang chọn ${selected.length}/${lessons.length} bài học.`;
+                }
             };
-            render('quiz-lesson-list','quiz-lesson',selectedQuizLesson,'selectQuizLesson','quiz-lesson-hint');
-            render('flash-lesson-list','flash-lesson',selectedFlashLesson,'selectFlashLesson','flash-lesson-hint');
+            render('quiz-lesson-list','quiz-lesson',selectedQuizLessons,'selectQuizLesson','quiz-lesson-hint');
+            render('flash-lesson-list','flash-lesson',selectedFlashLessons,'selectFlashLesson','flash-lesson-hint');
         }
 
-        function selectQuizLesson(value) {
-            selectedQuizLesson = value || '__ALL__';
+        function selectQuizLesson(value, checked) {
+            if (value === '__ALL__') {
+                selectedQuizLessons = [];
+            } else {
+                const next = new Set(selectedQuizLessons);
+                if (checked) next.add(value); else next.delete(value);
+                selectedQuizLessons = [...next];
+                if (!selectedQuizLessons.length) selectedQuizLessons = [];
+            }
             renderLessonSelectors();
-            updateDataLockUI();
             updateQuestionSourceUI();
             setMaxQuestions();
         }
 
-        function selectFlashLesson(value) {
-            selectedFlashLesson = value || '__ALL__';
+        function selectFlashLesson(value, checked) {
+            if (value === '__ALL__') {
+                selectedFlashLessons = [];
+            } else {
+                const next = new Set(selectedFlashLessons);
+                if (checked) next.add(value); else next.delete(value);
+                selectedFlashLessons = [...next];
+            }
             renderLessonSelectors();
             updateFlashSourceUI();
         }
 
-        function filterStudyVocabulary(source, lesson) {
+        function filterStudyVocabulary(source, lessonSelection) {
             let result = source === 'favorite' ? vocabulary.filter(v => v.favorite) : [...vocabulary];
-            if (lesson && lesson !== '__ALL__') result = result.filter(v => String(v.lesson || '').trim() === String(lesson).trim());
+            const selected = Array.isArray(lessonSelection) ? lessonSelection : [];
+            if (selected.length > 0) {
+                const set = new Set(selected.map(x => String(x).trim()));
+                result = result.filter(v => set.has(String(v.lesson || '').trim()));
+            }
             return result;
+        }
+
+        function getLessonSelectionText(selectedLessons) {
+            const selected = Array.isArray(selectedLessons) ? selectedLessons : [];
+            if (!selected.length) return 'tất cả bài học';
+            if (selected.length <= 3) return selected.map(x => 'Bài ' + x).join(', ');
+            return `${selected.length} bài học đã chọn`;
         }
 
         function updateQuestionSourceUI() {
             updateFavoriteCountHint();
             const source = document.querySelector('input[name="q-source"]:checked')?.value || 'active';
-            const count = filterStudyVocabulary(source, selectedQuizLesson).length;
+            const count = filterStudyVocabulary(source, selectedQuizLessons).length;
             const el = document.getElementById('favorite-count-hint');
             if (el) el.innerText = source === 'favorite'
-                ? `Có ${count} từ yêu thích trong ${selectedQuizLesson === '__ALL__' ? 'tất cả bài học' : 'Bài ' + selectedQuizLesson}.`
-                : `Có ${count} từ trong ${selectedQuizLesson === '__ALL__' ? 'tất cả bài học' : 'Bài ' + selectedQuizLesson}.`;
+                ? `Có ${count} từ yêu thích trong ${getLessonSelectionText(selectedQuizLessons)}.`
+                : `Có ${count} từ trong ${getLessonSelectionText(selectedQuizLessons)}.`;
         }
 
         function updateFlashSourceUI() {
             const source = document.querySelector('input[name="flash-source"]:checked')?.value || 'active';
-            const count = filterStudyVocabulary(source, selectedFlashLesson).length;
+            const count = filterStudyVocabulary(source, selectedFlashLessons).length;
             const el = document.getElementById('flash-lesson-hint');
-            if (el) el.innerText = `Có ${count} từ phù hợp để học Flashcard.`;
+            if (el) el.innerText = `Có ${count} từ phù hợp để học Flashcard trong ${getLessonSelectionText(selectedFlashLessons)}.`;
         }
 
         function setMaxQuestions() {
             const source = document.querySelector('input[name="q-source"]:checked')?.value || 'active';
-            const activeVocab = filterStudyVocabulary(source, selectedQuizLesson);
-            document.getElementById('q-count-input').value = activeVocab.length;
+            const activeVocab = filterStudyVocabulary(source, selectedQuizLessons);
+            const input = document.getElementById('q-count-input');
+            if (input) input.value = activeVocab.length;
         }
 
         function startQuiz() {
             const source = document.querySelector('input[name="q-source"]:checked')?.value || 'active';
-            const activeVocab = filterStudyVocabulary(source, selectedQuizLesson);
+            const activeVocab = filterStudyVocabulary(source, selectedQuizLessons);
             if (activeVocab.length < 2) { alert(source === 'favorite' ? "Cần ít nhất 2 từ yêu thích!" : "Cần ít nhất 2 từ vựng!"); return; }
 
             const countInput = document.getElementById('q-count-input').value;
@@ -3081,7 +3137,7 @@ favorite:!!item.favorite, showDetail:!!item.showDetail,
 
         function startFlashcards() {
             const source = document.querySelector('input[name="flash-source"]:checked')?.value || 'active';
-            const activeVocab = filterStudyVocabulary(source, selectedFlashLesson);
+            const activeVocab = filterStudyVocabulary(source, selectedFlashLessons);
             if (activeVocab.length === 0) { alert(source === 'favorite' ? "Chưa có từ yêu thích!" : "Không có từ vựng!"); return; }
             quizPool = [...activeVocab].sort(() => 0.5 - Math.random());
             currentIndex = 0;
@@ -3291,11 +3347,6 @@ favorite:!!item.favorite, showDetail:!!item.showDetail,
             ut.volume = vnVolume / 100;
             ut.rate = 0.9;
 
-            if (selectedVnVoiceURI) {
-                const targetVoice = availableVnVoices.find(v => v.voiceURI === selectedVnVoiceURI);
-                if (targetVoice) ut.voice = targetVoice;
-            }
-
             window.speechSynthesis.speak(ut);
         }
 
@@ -3341,6 +3392,32 @@ favorite:!!item.favorite, showDetail:!!item.showDetail,
                 document.getElementById('time-back-val').innerText = val;
             }
         }
+
+        // =========================================================
+        // PHÍM TẮT TỰ LUẬN: Enter / Space
+        // =========================================================
+        document.addEventListener('keydown', function(e) {
+            if (currentActiveTab !== 'quiz' || currentFeature !== 'manual') return;
+            const quizActive = document.getElementById('quiz-active');
+            if (!quizActive || quizActive.classList.contains('hidden')) return;
+            if (e.key !== 'Enter' && e.key !== ' ') return;
+
+            const target = e.target;
+            const isTypingField = target && (
+                target.id === 'user-answer' ||
+                target.tagName === 'INPUT' ||
+                target.tagName === 'TEXTAREA'
+            );
+
+            e.preventDefault();
+            e.stopPropagation();
+
+            if (!answered) {
+                checkManualAnswer();
+            } else {
+                nextQuestion();
+            }
+        }, true);
 
         // Khởi động Firebase/Auth sau khi toàn bộ giao diện đã sẵn sàng.
         // Dữ liệu từ vựng không lưu trên thiết bị; Cloud là nguồn dữ liệu duy nhất.
