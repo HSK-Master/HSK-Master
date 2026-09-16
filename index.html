@@ -754,7 +754,7 @@
                     <span id="data-lock-status" class="text-[10px] font-bold text-orange-500 whitespace-nowrap">🔒 Đang khóa</span>
                 </div>
 
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
                     <button onclick="openDataEditor()" class="bg-blue-600 text-white px-3 py-3 rounded-xl text-[10px] font-bold uppercase hover:bg-blue-700 shadow-md">
                         <i class="fa-solid fa-plus mr-1"></i> THÊM TỪ
                     </button>
@@ -771,54 +771,43 @@
                 <p id="data-editor-status" class="text-[10px] text-custom-muted italic">🔒 Muốn thêm, sửa hoặc xóa dữ liệu phải mở khóa bằng mật khẩu.</p>
             </div>
 
-            <!-- EDITOR THÊM 1 TỪ -->
-            <div id="single-data-editor" class="bg-custom-card p-5 rounded-2xl border shadow-sm hidden">
-                <div class="flex items-center justify-between mb-4">
+            <!-- EDITOR NHẬP TỪ TRỰC TIẾP -->
+            <div id="bulk-data-editor" class="bg-custom-card p-5 rounded-2xl border shadow-sm hidden">
+                <div class="flex items-center justify-between gap-3 mb-4">
                     <div>
-                        <h3 class="font-bold text-sm">THÊM TỪ VỰNG</h3>
-                        <p class="text-[10px] text-custom-muted">Dữ liệu được lưu trực tiếp vào Firebase Cloud.</p>
+                        <h3 class="font-bold text-sm">NHẬP TỪ VỰNG</h3>
+                        <p class="text-[10px] text-custom-muted mt-1 leading-relaxed">
+                            Chỉ cần copy trực tiếp dữ liệu từ Excel và dán vào <b>một ô duy nhất</b>. Không cần chia thành từng ô.
+                        </p>
                     </div>
                     <button onclick="closeDataEditors()" class="icon-btn-40"><i class="fa-solid fa-xmark"></i></button>
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <div><label class="text-[10px] font-bold text-custom-muted uppercase mb-1 block">Tên bài học</label><input id="new-data-lesson" class="custom-input" placeholder="Ví dụ: Bài 1"></div>
-                    <div><label class="text-[10px] font-bold text-custom-muted uppercase mb-1 block">Hán tự</label><input id="new-data-hanzi" class="custom-input chinese-font" placeholder="你好"></div>
-                    <div><label class="text-[10px] font-bold text-custom-muted uppercase mb-1 block">Pinyin</label><input id="new-data-pinyin" class="custom-input" placeholder="nǐ hǎo"></div>
-                    <div><label class="text-[10px] font-bold text-custom-muted uppercase mb-1 block">Nghĩa</label><input id="new-data-meaning" class="custom-input" placeholder="xin chào"></div>
-                    <div>
-                        <label class="text-[10px] font-bold text-custom-muted uppercase mb-1 block">Yêu thích</label>
-                        <select id="new-data-favorite" class="custom-input"><option value="no">no — Không</option><option value="yes">yes — ⭐ Yêu thích</option></select>
-                    </div>
-                </div>
-                <div class="flex gap-3 mt-4">
-                    <button onclick="closeDataEditors()" class="flex-1 bg-slate-200 dark:bg-slate-800 px-4 py-3 rounded-xl text-[10px] font-bold uppercase">HỦY</button>
-                    <button onclick="saveNewDataWord()" class="flex-1 bg-blue-600 text-white px-4 py-3 rounded-xl text-[10px] font-bold uppercase">LƯU TỪ</button>
-                </div>
-            </div>
 
-            <!-- EDITOR NHIỀU TỪ -->
-            <div id="bulk-data-editor" class="bg-custom-card rounded-2xl border shadow-sm hidden overflow-hidden">
-                <div class="p-5 border-b">
-                    <div class="flex items-center justify-between gap-3">
-                        <div>
-                            <h3 class="font-bold text-sm">NHẬP NHIỀU TỪ TRỰC TIẾP</h3>
-                            <p class="text-[10px] text-custom-muted mt-1">Có thể Ctrl+V trực tiếp dữ liệu dạng bảng từ Excel/Google Sheets. Không cần upload file.</p>
-                        </div>
-                        <button onclick="closeDataEditors()" class="icon-btn-40"><i class="fa-solid fa-xmark"></i></button>
+                <div class="rounded-xl border bg-slate-50 dark:bg-slate-900/50 p-3 mb-3">
+                    <div class="text-[10px] font-bold text-custom-muted uppercase mb-2">ĐỊNH DẠNG DỮ LIỆU</div>
+                    <div class="text-[11px] leading-relaxed text-custom-muted">
+                        Mỗi dòng gồm đúng 3 cụm, ngăn cách bằng <b>phím TAB</b>:
+                        <br><b>Tên bài học</b> TAB <b>Hán tự - Pinyin - Nghĩa</b> TAB <b>yes/no</b>
+                        <br><br>Ví dụ: <code>H5 - 17	事物 - shìwù - Sự vật	yes</code>
                     </div>
                 </div>
-                <div class="p-3 overflow-x-auto">
-                    <table class="vocab-table data-entry-table">
-                        <thead><tr><th>Tên bài học</th><th>Hán tự - Pinyin - Nghĩa</th><th class="w-24 text-center">Mức yêu thích</th><th class="w-16"></th></tr></thead>
-                        <tbody id="bulk-data-rows"></tbody>
-                    </table>
-                    <p class="text-[10px] text-custom-muted mt-2 px-1">Quy tắc dán từ Excel: <b>Tên bài học</b> TAB <b>Hán tự - Pinyin - Nghĩa</b> TAB <b>yes/no</b>. Ví dụ: H5 - 17 TAB 事物 - shìwù - Sự vật TAB yes</p>
-                </div>
-                <div class="p-4 border-t flex flex-wrap gap-2">
-                    <button onclick="addBulkDataRow()" class="bg-slate-200 dark:bg-slate-800 px-4 py-3 rounded-xl text-[10px] font-bold uppercase"><i class="fa-solid fa-plus mr-1"></i> THÊM DÒNG</button>
-                    <button onclick="pasteBulkData()" class="bg-emerald-600 text-white px-4 py-3 rounded-xl text-[10px] font-bold uppercase"><i class="fa-solid fa-paste mr-1"></i> DÁN BẢNG</button>
-                    <button onclick="clearBulkDataRows()" class="bg-red-100 dark:bg-red-950/30 text-red-600 px-4 py-3 rounded-xl text-[10px] font-bold uppercase">XÓA DÒNG TRỐNG</button>
-                    <button onclick="saveBulkData()" class="ml-auto bg-blue-600 text-white px-6 py-3 rounded-xl text-[10px] font-bold uppercase shadow-md">LƯU TẤT CẢ</button>
+
+                <textarea id="bulk-data-textarea" class="data-paste-textarea" spellcheck="false"
+                    placeholder="Dán trực tiếp dữ liệu từ Excel vào đây...
+
+Ví dụ:
+H5 - 17	事物 - shìwù - Sự vật	yes
+H5 - 17	高峰 - gāofēng - Đỉnh cao, cao điểm	yes
+H5 - 17	终点 - zhōngdiǎn - Điểm cuối cùng, điểm kết thúc	no
+H5 - 17	迅速 - xùnsù - Nhanh chóng	yes"></textarea>
+
+                <div class="flex flex-wrap gap-2 mt-3">
+                    <button onclick="clearBulkDataText()" class="bg-red-100 dark:bg-red-950/30 text-red-600 px-4 py-3 rounded-xl text-[10px] font-bold uppercase">
+                        <i class="fa-solid fa-eraser mr-1"></i> XÓA
+                    </button>
+                    <button onclick="saveBulkData()" class="ml-auto bg-blue-600 text-white px-6 py-3 rounded-xl text-[10px] font-bold uppercase shadow-md">
+                        <i class="fa-solid fa-cloud-arrow-up mr-1"></i> LƯU VÀO CLOUD
+                    </button>
                 </div>
             </div>
 
@@ -1629,10 +1618,7 @@ favorite:!!item.favorite, showDetail:!!item.showDetail,
         }
 
         function openDataEditor() {
-            if (!dataFileUnlocked) { unlockData(); return; }
-            closeDataEditors();
-            document.getElementById('single-data-editor')?.classList.remove('hidden');
-            document.getElementById('new-data-lesson')?.focus();
+            openBulkEditor();
         }
 
         function closeDataEditors() {
@@ -1645,105 +1631,150 @@ favorite:!!item.favorite, showDetail:!!item.showDetail,
             closeDataEditors();
             const box = document.getElementById('bulk-data-editor');
             box?.classList.remove('hidden');
-            const tbody = document.getElementById('bulk-data-rows');
-            if (tbody && !tbody.children.length) for (let i = 0; i < 5; i++) addBulkDataRow();
+            setTimeout(() => document.getElementById('bulk-data-textarea')?.focus(), 50);
         }
 
-        function createBulkRow(item = {}) {
-            const tr = document.createElement('tr');
-            tr.className = 'data-entry-row';
-            const combined = item.h || item.p || item.m ? [item.h || '', item.p || '', item.m || ''].filter(Boolean).join(' - ') : '';
-            tr.innerHTML = `
-                <td><input class="data-entry-input bulk-lesson" value="${escapeHtml(item.lesson || '')}" placeholder="H5 - 17"></td>
-                <td><input class="data-entry-input bulk-combined" value="${escapeHtml(combined)}" placeholder="事物 - shìwù - Sự vật"></td>
-                <td><select class="data-entry-input bulk-favorite"><option value="no" ${item.favorite ? '' : 'selected'}>no</option><option value="yes" ${item.favorite ? 'selected' : ''}>yes</option></select></td>
-                <td class="text-center"><button type="button" onclick="this.closest('tr').remove()" class="vocab-action-btn delete" title="Xóa dòng"><i class="fa-solid fa-trash text-[10px]"></i></button></td>`;
-            return tr;
-        }
-
-        function addBulkDataRow(item = {}) {
-            const tbody = document.getElementById('bulk-data-rows');
-            if (tbody) tbody.appendChild(createBulkRow(item));
-        }
-
-        function clearBulkDataRows() {
-            const tbody = document.getElementById('bulk-data-rows');
-            if (!tbody) return;
-            [...tbody.querySelectorAll('tr')].forEach(tr => {
-                const combined = tr.querySelector('.bulk-combined')?.value.trim();
-                if (!combined) tr.remove();
-            });
-            if (!tbody.children.length) addBulkDataRow();
+        function clearBulkDataText() {
+            const textarea = document.getElementById('bulk-data-textarea');
+            if (textarea) textarea.value = '';
         }
 
         function parseBulkCombinedValue(combined) {
             const parts = String(combined || '').trim().split(/\s+-\s+/);
             if (parts.length < 3) return {h:'', p:'', m:''};
-            return { h: parts[0].trim(), p: parts[1].trim(), m: parts.slice(2).join(' - ').trim() };
+            return {
+                h: parts[0].trim(),
+                p: parts[1].trim(),
+                m: parts.slice(2).join(' - ').trim()
+            };
         }
 
-        function pasteBulkData() {
-            if (!dataFileUnlocked) { unlockData(); return; }
-            const text = prompt('Dán dữ liệu từ Excel theo đúng 3 cột, cách nhau bằng TAB:\n\nTên bài học | Hán tự - Pinyin - Nghĩa | yes/no\n\nVí dụ:\nH5 - 17\t事物 - shìwù - Sự vật\tyes\nH5 - 17\t高峰 - gāofēng - Đỉnh cao, cao điểm\tyes');
-            if (text === null) return;
-            const rows = text.split(/\r?\n/).filter(line => line.trim());
-            const tbody = document.getElementById('bulk-data-rows');
-            if (!tbody) return;
-            tbody.innerHTML = '';
-            rows.forEach(line => {
-                const c = line.split('\t');
-                if (c.length >= 2) {
-                    const parsed = parseBulkCombinedValue(c[1]);
-                    addBulkDataRow({ lesson:c[0] || '', h:parsed.h, p:parsed.p, m:parsed.m, favorite:parseFavoriteValue(c[2] || 'no') });
+        function parseBulkText(text) {
+            const result = [];
+            const lines = String(text || '').replace(/\r/g, '').split('\n');
+
+            lines.forEach((rawLine, index) => {
+                const line = rawLine.trimEnd();
+                if (!line.trim()) return;
+
+                // Cho phép người dùng dán cả dòng tiêu đề từ Excel.
+                const normalized = line.toLowerCase().replace(/\s+/g, ' ');
+                if (index === 0 && normalized.includes('tên bài học') && normalized.includes('hán tự') && normalized.includes('mức yêu thích')) return;
+
+                const columns = line.split('\t');
+                if (columns.length < 3) {
+                    result.push({
+                        lineNumber: index + 1,
+                        error: 'Thiếu TAB: mỗi dòng phải có 3 cụm dữ liệu.',
+                        raw: line
+                    });
+                    return;
                 }
-            });
-            if (!tbody.children.length) addBulkDataRow();
-        }
 
-        async function saveNewDataWord() {
-            if (!dataFileUnlocked) { unlockData(); return; }
-            const item = { h:document.getElementById('new-data-hanzi')?.value.trim(), p:document.getElementById('new-data-pinyin')?.value.trim(), m:document.getElementById('new-data-meaning')?.value.trim(), lesson:document.getElementById('new-data-lesson')?.value.trim(), favorite:document.getElementById('new-data-favorite')?.value === 'yes', showDetail:false, isOriginal:true };
-            if (!item.h || !item.p || !item.m) { alert('Hán tự, Pinyin và Nghĩa không được để trống.'); return; }
-            if (vocabulary.some(v => vocabKey(v) === vocabKey(item))) { alert('Từ này đã tồn tại với cùng Hán tự + Pinyin + Nghĩa.'); return; }
-            try {
-                const ok = await persistVocabularyItem(item);
-                if (!ok) return;
-                vocabulary.push(item);
-                vocabulary.sort((a,b) => a.h.localeCompare(b.h));
-                document.getElementById('new-data-hanzi').value=''; document.getElementById('new-data-pinyin').value=''; document.getElementById('new-data-meaning').value='';
-                renderTable(); updateFavoriteCountHint(); renderLessonSelectors(); updateQuestionSourceUI(); updateFlashSourceUI();
-                setCloudStatus('☁ Đã lưu từ mới', 'green');
-            } catch(e) { console.error(e); }
+                const lesson = columns[0].trim();
+                const combined = columns[1].trim();
+                const favoriteRaw = columns.slice(2).join('\t').trim();
+                const parsed = parseBulkCombinedValue(combined);
+
+                result.push({
+                    lineNumber: index + 1,
+                    lesson,
+                    h: parsed.h,
+                    p: parsed.p,
+                    m: parsed.m,
+                    favorite: parseFavoriteValue(favoriteRaw),
+                    favoriteRaw,
+                    raw: line
+                });
+            });
+
+            return result;
         }
 
         async function saveBulkData() {
             if (!dataFileUnlocked) { unlockData(); return; }
-            const rows = [...document.querySelectorAll('#bulk-data-rows tr')];
-            const items = rows.map(tr => {
-                const parsed = parseBulkCombinedValue(tr.querySelector('.bulk-combined')?.value || '');
-                return {
-                    lesson:tr.querySelector('.bulk-lesson')?.value.trim() || '',
-                    h:parsed.h, p:parsed.p, m:parsed.m,
-                    favorite:tr.querySelector('.bulk-favorite')?.value === 'yes',
-                    showDetail:false, isOriginal:true
-                };
-            }).filter(x => x.h || x.p || x.m || x.lesson);
-            const invalid = items.filter(x => !x.h || !x.p || !x.m);
-            if (invalid.length) { alert(`Có ${invalid.length} dòng chưa đúng định dạng Hán tự - Pinyin - Nghĩa.`); return; }
-            const unique = new Map(); let duplicates = 0;
-            items.forEach(item => { const key=vocabKey(item); if(unique.has(key)) duplicates++; else unique.set(key,item); });
+
+            const textarea = document.getElementById('bulk-data-textarea');
+            const text = textarea?.value || '';
+            if (!text.trim()) {
+                alert('Hãy dán dữ liệu từ Excel vào ô nhập trước khi lưu.');
+                textarea?.focus();
+                return;
+            }
+
+            const parsedRows = parseBulkText(text);
+            const errors = parsedRows.filter(row => row.error);
+            if (errors.length) {
+                const detail = errors.slice(0, 8).map(e => `Dòng ${e.lineNumber}: ${e.error}`).join('\n');
+                alert(`Có ${errors.length} dòng chưa đúng định dạng.\n\n${detail}${errors.length > 8 ? '\n...' : ''}\n\nĐịnh dạng đúng: Tên bài học TAB Hán tự - Pinyin - Nghĩa TAB yes/no`);
+                return;
+            }
+
+            const items = parsedRows.map(row => ({
+                lesson: row.lesson,
+                h: row.h,
+                p: row.p,
+                m: row.m,
+                favorite: !!row.favorite,
+                showDetail: false,
+                isOriginal: true
+            }));
+
+            const invalid = items.filter(x => !x.lesson || !x.h || !x.p || !x.m);
+            if (invalid.length) {
+                alert(`Có ${invalid.length} dòng thiếu dữ liệu. Mỗi dòng phải có Tên bài học và đầy đủ Hán tự - Pinyin - Nghĩa.`);
+                return;
+            }
+
+            const unique = new Map();
+            let duplicates = 0;
+            items.forEach(item => {
+                const key = vocabKey(item);
+                if (unique.has(key)) duplicates++;
+                else unique.set(key, item);
+            });
+
             const existing = new Set(vocabulary.map(v => vocabKey(v)));
             const toSave = [...unique.values()].filter(item => !existing.has(vocabKey(item)));
-            if (!toSave.length) { alert('Không có từ mới để lưu.'); return; }
+
+            if (!toSave.length) {
+                alert(`Không có từ mới để lưu.${duplicates ? `\nĐã bỏ qua ${duplicates} dòng trùng trong phần nhập.` : ''}`);
+                return;
+            }
+
             try {
                 const col = getVocabularyCollection();
-                const ops = toSave.map(item => ({type:'set', ref:col.doc(vocabDocId(item)), data:{h:item.h,p:item.p,m:item.m,lesson:item.lesson,favorite:!!item.favorite,showDetail:false,isOriginal:true,createdAt:firebase.firestore.FieldValue.serverTimestamp(),updatedAt:firebase.firestore.FieldValue.serverTimestamp()}}));
+                if (!col) {
+                    alert('Chưa sẵn sàng kết nối Firestore Cloud.');
+                    return;
+                }
+
+                const ops = toSave.map(item => ({
+                    type: 'set',
+                    ref: col.doc(vocabDocId(item)),
+                    data: {
+                        h: item.h,
+                        p: item.p,
+                        m: item.m,
+                        lesson: item.lesson,
+                        favorite: !!item.favorite,
+                        showDetail: false,
+                        isOriginal: true,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    }
+                }));
+
                 await writeBatchChunks(ops);
                 await loadCloudVocabulary();
+                clearBulkDataText();
                 closeDataEditors();
                 setCloudStatus('☁ Đã lưu dữ liệu', 'green');
                 alert(`Đã lưu ${toSave.length} từ mới.${duplicates ? `\nBỏ qua ${duplicates} dòng trùng trong phần nhập.` : ''}`);
-            } catch(error) { console.error(error); alert('Không thể lưu dữ liệu: ' + (error.message || error)); }
+            } catch(error) {
+                console.error('Bulk vocabulary save error:', error);
+                alert('Không thể lưu dữ liệu: ' + (error.message || error));
+            }
         }
 
         function loadAvailableVoices() {
