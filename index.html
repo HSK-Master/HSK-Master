@@ -596,45 +596,20 @@
             max-width: 100% !important;
         }
 
-        /* BẢNG TỪ VỰNG TRÊN ĐIỆN THOẠI:
-           luôn vừa đúng chiều ngang khung web, không tạo thanh cuộn ngang.
-           Cột EDIT được chừa đủ chỗ cho cả 2 nút Sửa + Xóa. */
         body.phone-mode .vocab-table {
             table-layout: fixed;
-            width: 100% !important;
-            min-width: 0 !important;
-            max-width: 100% !important;
+            min-width: 650px;
         }
         body.phone-mode .vocab-table th,
         body.phone-mode .vocab-table td {
-            padding: 6px 4px;
-            box-sizing: border-box;
+            padding: 6px 6px;
         }
-        body.phone-mode .vocab-table th:nth-child(1),
-        body.phone-mode .vocab-table td:nth-child(1) { width: 12%; }
-        body.phone-mode .vocab-table th:nth-child(2),
-        body.phone-mode .vocab-table td:nth-child(2) { width: 16%; }
-        body.phone-mode .vocab-table th:nth-child(3),
-        body.phone-mode .vocab-table td:nth-child(3) { width: 18%; }
-        body.phone-mode .vocab-table th:nth-child(4),
-        body.phone-mode .vocab-table td:nth-child(4) { width: 34%; }
-        body.phone-mode .vocab-table th:nth-child(5),
-        body.phone-mode .vocab-table td:nth-child(5) { width: 8%; }
-        body.phone-mode .vocab-table th:nth-child(6),
-        body.phone-mode .vocab-table td:nth-child(6) { width: 12%; }
-
-        /* 2 nút EDIT/XÓA phải nằm gọn trong cột, không đẩy rộng bảng. */
-        body.phone-mode .vocab-table .vocab-action-btn {
-            width: 26px !important;
-            height: 32px !important;
-            margin: 0 !important;
-            padding: 0 !important;
-        }
-        body.phone-mode .vocab-table .favorite-table-btn {
-            width: 26px !important;
-            height: 30px !important;
-            font-size: 20px !important;
-        }
+        body.phone-mode .vocab-table thead th:nth-child(1) { width: 12%; }
+        body.phone-mode .vocab-table thead th:nth-child(2) { width: 18%; }
+        body.phone-mode .vocab-table thead th:nth-child(3) { width: 20%; }
+        body.phone-mode .vocab-table thead th:nth-child(4) { width: 34%; }
+        body.phone-mode .vocab-table thead th:nth-child(5) { width: 7%; }
+        body.phone-mode .vocab-table thead th:nth-child(6) { width: 9%; }
 
         body.phone-mode .option-grid {
             grid-template-columns: 1fr !important;
@@ -836,6 +811,119 @@
                 white-space: nowrap;
             }
         }
+
+
+        /* =========================================================
+           FIX BẢNG DANH SÁCH TỪ VỰNG - DESKTOP + ĐIỆN THOẠI
+           Mục tiêu: bảng luôn nằm gọn trong khung web, không cần
+           kéo ngang để nhìn thấy nút Sửa/Xóa.
+           ========================================================= */
+        .vocab-table {
+            width: 100% !important;
+            max-width: 100% !important;
+            min-width: 0 !important;
+            table-layout: fixed !important;
+            box-sizing: border-box;
+        }
+
+        .vocab-table th,
+        .vocab-table td {
+            box-sizing: border-box;
+            min-width: 0;
+        }
+
+        /* Desktop */
+        .vocab-table th:nth-child(1),
+        .vocab-table td:nth-child(1) { width: 10% !important; }
+        .vocab-table th:nth-child(2),
+        .vocab-table td:nth-child(2) { width: 17% !important; }
+        .vocab-table th:nth-child(3),
+        .vocab-table td:nth-child(3) { width: 17% !important; }
+        .vocab-table th:nth-child(4),
+        .vocab-table td:nth-child(4) { width: 37% !important; }
+        .vocab-table th:nth-child(5),
+        .vocab-table td:nth-child(5) { width: 6% !important; }
+        .vocab-table th:nth-child(6),
+        .vocab-table td:nth-child(6) { width: 13% !important; }
+
+        /* Không cho nội dung dài phá chiều rộng cột. */
+        .vocab-table .lesson-cell,
+        .vocab-table .hanzi-cell,
+        .vocab-table .pinyin-cell,
+        .vocab-table .meaning-cell {
+            min-width: 0;
+            max-width: 100%;
+            overflow-wrap: anywhere;
+            word-break: break-word;
+        }
+
+        /* Cột thao tác luôn đủ chỗ cho 2 nút trên desktop. */
+        .vocab-table td:last-child {
+            white-space: nowrap !important;
+            text-align: center;
+            overflow: hidden;
+        }
+
+        .vocab-table .vocab-action-btn {
+            width: 28px !important;
+            height: 28px !important;
+            margin: 0 1px !important;
+            padding: 0 !important;
+            flex: 0 0 28px;
+        }
+
+        .vocab-table .favorite-table-btn {
+            width: 28px !important;
+            height: 28px !important;
+            max-width: 100%;
+        }
+
+        /* Điện thoại: bỏ hoàn toàn min-width 650px của cấu hình cũ. */
+        body.phone-mode .vocab-table {
+            width: 100% !important;
+            max-width: 100% !important;
+            min-width: 0 !important;
+            table-layout: fixed !important;
+        }
+
+        body.phone-mode .vocab-table th,
+        body.phone-mode .vocab-table td {
+            box-sizing: border-box;
+            min-width: 0;
+            padding: 6px 4px !important;
+        }
+
+        body.phone-mode .vocab-table th:nth-child(1),
+        body.phone-mode .vocab-table td:nth-child(1) { width: 12% !important; }
+        body.phone-mode .vocab-table th:nth-child(2),
+        body.phone-mode .vocab-table td:nth-child(2) { width: 17% !important; }
+        body.phone-mode .vocab-table th:nth-child(3),
+        body.phone-mode .vocab-table td:nth-child(3) { width: 20% !important; }
+        body.phone-mode .vocab-table th:nth-child(4),
+        body.phone-mode .vocab-table td:nth-child(4) { width: 31% !important; }
+        body.phone-mode .vocab-table th:nth-child(5),
+        body.phone-mode .vocab-table td:nth-child(5) { width: 7% !important; }
+        body.phone-mode .vocab-table th:nth-child(6),
+        body.phone-mode .vocab-table td:nth-child(6) { width: 13% !important; }
+
+        body.phone-mode .vocab-table td:last-child {
+            white-space: nowrap !important;
+            overflow: hidden;
+        }
+
+        body.phone-mode .vocab-table .vocab-action-btn {
+            width: 22px !important;
+            height: 22px !important;
+            margin: 0 1px !important;
+            flex: 0 0 22px;
+        }
+
+        body.phone-mode .vocab-table .favorite-table-btn {
+            width: 24px !important;
+            height: 24px !important;
+            font-size: 19px !important;
+        }
+
     </style>
 </head>
 <body class="p-4 md:p-8">
