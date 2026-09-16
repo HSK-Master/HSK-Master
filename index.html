@@ -763,15 +763,18 @@
                     <span id="data-lock-status" class="text-[10px] font-bold text-orange-500 whitespace-nowrap">🔒 Đang khóa</span>
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
                     <button onclick="openBulkEditor()" class="bg-emerald-600 text-white px-3 py-3 rounded-xl text-[10px] font-bold uppercase hover:bg-emerald-700 shadow-md">
                         <i class="fa-solid fa-table-list mr-1"></i> NHẬP NHIỀU TỪ
                     </button>
-                    <button onclick="unlockData()" id="data-unlock-btn" class="bg-slate-600 text-white px-3 py-3 rounded-xl text-[10px] font-bold uppercase hover:bg-slate-700 shadow-md">
-                        <i class="fa-solid fa-lock-open mr-1"></i> MỞ KHÓA
+                    <button onclick="unlockData()" id="data-unlock-btn" class="bg-slate-600 text-white px-3 py-3 rounded-xl text-[10px] font-bold uppercase hover:bg-slate-700 shadow-md" title="Mở khóa DATA" aria-label="Mở khóa DATA">
+                        <i class="fa-solid fa-lock-open"></i>
                     </button>
-                    <button onclick="lockData()" class="bg-slate-600 text-white px-3 py-3 rounded-xl text-[10px] font-bold uppercase hover:bg-slate-700 shadow-md">
-                        <i class="fa-solid fa-lock mr-1"></i> KHÓA
+                    <button onclick="lockData()" class="bg-slate-600 text-white px-3 py-3 rounded-xl text-[10px] font-bold uppercase hover:bg-slate-700 shadow-md" title="Khóa DATA" aria-label="Khóa DATA">
+                        <i class="fa-solid fa-lock"></i>
+                    </button>
+                    <button onclick="openDeleteAllVocabulary()" class="bg-red-600 text-white px-3 py-3 rounded-xl text-[10px] font-bold uppercase hover:bg-red-700 shadow-md" title="Xóa toàn bộ từ vựng trên Cloud" aria-label="Xóa toàn bộ từ vựng trên Cloud">
+                        <i class="fa-solid fa-trash-can"></i>
                     </button>
                 </div>
                 <p id="data-editor-status" class="text-[10px] text-custom-muted italic">🔒 Muốn thêm, sửa hoặc xóa dữ liệu phải mở khóa bằng mật khẩu.</p>
@@ -894,6 +897,25 @@ H5 - 17	迅速 - xùnsù - Nhanh chóng	yes"></textarea>
                 <input id="data-file-password" type="password" inputmode="numeric" maxlength="20" class="custom-input text-center tracking-[0.35em]" placeholder="Mật khẩu" onkeydown="if(event.key==='Enter') confirmDataPassword()">
                 <p id="data-password-error" class="hidden text-[10px] text-red-500 mt-2 text-center">Mật khẩu không đúng.</p>
                 <div class="flex gap-3 mt-4"><button onclick="closeDataPasswordModal()" class="flex-1 bg-slate-200 dark:bg-slate-800 px-4 py-3 rounded-xl text-[10px] font-bold uppercase">HỦY</button><button onclick="confirmDataPassword()" class="flex-1 bg-blue-600 text-white px-4 py-3 rounded-xl text-[10px] font-bold uppercase">MỞ KHÓA</button></div>
+            </div>
+        </div>
+
+        <!-- MODAL XÁC NHẬN XÓA TOÀN BỘ CLOUD -->
+        <div id="delete-all-vocab-modal" class="vocab-modal hidden">
+            <div class="vocab-modal-card max-w-md">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-10 h-10 rounded-xl bg-red-100 dark:bg-red-900/30 flex items-center justify-center"><i class="fa-solid fa-triangle-exclamation text-red-600"></i></div>
+                    <div><h3 class="font-bold text-sm">XÓA TOÀN BỘ TỪ VỰNG</h3><p class="text-[10px] text-custom-muted">Thao tác này sẽ xóa toàn bộ dữ liệu từ vựng của tài khoản khỏi Cloud.</p></div>
+                </div>
+                <div class="bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/50 rounded-xl p-3 mb-4">
+                    <p class="text-[11px] text-red-700 dark:text-red-300 font-semibold">⚠ Không thể hoàn tác sau khi xóa.</p>
+                </div>
+                <input id="delete-all-password" type="password" inputmode="numeric" maxlength="20" class="custom-input text-center tracking-[0.35em]" placeholder="Nhập mật khẩu để xác nhận" onkeydown="if(event.key==='Enter') confirmDeleteAllVocabulary()">
+                <p id="delete-all-password-error" class="hidden text-[10px] text-red-500 mt-2 text-center">Mật khẩu không đúng.</p>
+                <div class="flex gap-3 mt-4">
+                    <button onclick="closeDeleteAllVocabulary()" class="flex-1 bg-slate-200 dark:bg-slate-800 px-4 py-3 rounded-xl text-[10px] font-bold uppercase">HỦY</button>
+                    <button onclick="confirmDeleteAllVocabulary()" id="delete-all-confirm-btn" class="flex-1 bg-red-600 text-white px-4 py-3 rounded-xl text-[10px] font-bold uppercase">XÓA TOÀN BỘ</button>
+                </div>
             </div>
         </div>
 
@@ -1577,7 +1599,11 @@ favorite:!!item.favorite, showDetail:!!item.showDetail,
                 status.className = dataFileUnlocked ? 'text-[10px] font-bold text-emerald-500 whitespace-nowrap' : 'text-[10px] font-bold text-orange-500 whitespace-nowrap';
             }
             if (hint) hint.innerText = dataFileUnlocked ? '🟢 Đã mở khóa. Bạn có thể thêm, sửa, xóa và nhập nhiều từ trực tiếp.' : '🔒 Muốn thêm, sửa hoặc xóa dữ liệu phải mở khóa bằng mật khẩu.';
-            if (unlock) unlock.innerHTML = dataFileUnlocked ? '<i class="fa-solid fa-unlock mr-1"></i> ĐÃ MỞ KHÓA' : '<i class="fa-solid fa-lock-open mr-1"></i> MỞ KHÓA';
+            if (unlock) {
+                unlock.innerHTML = dataFileUnlocked ? '<i class="fa-solid fa-unlock"></i>' : '<i class="fa-solid fa-lock-open"></i>';
+                unlock.title = dataFileUnlocked ? 'DATA đã mở khóa' : 'Mở khóa DATA';
+                unlock.setAttribute('aria-label', dataFileUnlocked ? 'DATA đã mở khóa' : 'Mở khóa DATA');
+            }
         }
 
         function unlockData() {
@@ -1610,9 +1636,115 @@ favorite:!!item.favorite, showDetail:!!item.showDetail,
         function lockData() {
             dataFileUnlocked = false;
             closeDataPasswordModal();
+            closeDeleteAllVocabulary();
             closeDataEditors();
             closeVocabEditModal();
             updateDataLockUI();
+        }
+
+        function closeDeleteAllVocabulary() {
+            const modal = document.getElementById('delete-all-vocab-modal');
+            const input = document.getElementById('delete-all-password');
+            const error = document.getElementById('delete-all-password-error');
+            if (modal) modal.classList.add('hidden');
+            if (input) input.value = '';
+            if (error) error.classList.add('hidden');
+        }
+
+        function openDeleteAllVocabulary() {
+            if (!currentUser || !firestoreReady) {
+                alert('Hãy đăng nhập Google trước.');
+                return;
+            }
+            const modal = document.getElementById('delete-all-vocab-modal');
+            const input = document.getElementById('delete-all-password');
+            const error = document.getElementById('delete-all-password-error');
+            if (error) error.classList.add('hidden');
+            if (input) input.value = '';
+            if (modal) modal.classList.remove('hidden');
+            setTimeout(() => input?.focus(), 50);
+        }
+
+        async function confirmDeleteAllVocabulary() {
+            if (!currentUser || !firestoreReady) {
+                closeDeleteAllVocabulary();
+                alert('Hãy đăng nhập Google trước.');
+                return;
+            }
+
+            const input = document.getElementById('delete-all-password');
+            const error = document.getElementById('delete-all-password-error');
+            const confirmBtn = document.getElementById('delete-all-confirm-btn');
+
+            if ((input?.value || '') !== DATA_FILE_PASSWORD) {
+                if (error) error.classList.remove('hidden');
+                if (input) { input.value = ''; input.focus(); }
+                return;
+            }
+
+            const col = getVocabularyCollection();
+            if (!col) {
+                closeDeleteAllVocabulary();
+                alert('Không thể kết nối Firestore Cloud.');
+                return;
+            }
+
+            try {
+                const snap = await col.get();
+                const total = snap.size;
+
+                if (total === 0) {
+                    closeDeleteAllVocabulary();
+                    vocabulary = [];
+                    renderTable();
+                    updateFavoriteCountHint();
+                    renderLessonSelectors();
+                    updateQuestionSourceUI();
+                    updateFlashSourceUI();
+                    alert('Cloud hiện không có từ vựng để xóa.');
+                    return;
+                }
+
+                const finalConfirm = confirm(
+                    `Bạn chắc chắn muốn XÓA TOÀN BỘ ${total} TỪ VỰNG khỏi Cloud?\n\n` +
+                    `Toàn bộ dữ liệu Hán tự, Pinyin, Nghĩa, Bài học và Yêu thích sẽ bị xóa.\n\n` +
+                    `KHÔNG THỂ HOÀN TÁC.`
+                );
+                if (!finalConfirm) return;
+
+                if (confirmBtn) {
+                    confirmBtn.disabled = true;
+                    confirmBtn.style.opacity = '0.6';
+                    confirmBtn.innerText = `ĐANG XÓA ${total} TỪ...`;
+                }
+                setCloudStatus(`☁ Đang xóa ${total} từ...`, 'red');
+
+                const operations = snap.docs.map(doc => ({ type:'delete', ref:doc.ref }));
+                await writeBatchChunks(operations);
+
+                vocabulary = [];
+                quizPool = [];
+                wrongAnswers = [];
+                currentIndex = 0;
+                renderTable();
+                updateFavoriteCountHint();
+                renderLessonSelectors();
+                updateQuestionSourceUI();
+                updateFlashSourceUI();
+                closeDeleteAllVocabulary();
+                setCloudStatus(`☁ Đã xóa toàn bộ ${total} từ`, 'green');
+                alert(`Đã xóa toàn bộ ${total} từ vựng khỏi Cloud.`);
+            } catch (error) {
+                console.error('Delete all vocabulary error:', error);
+                setCloudStatus('⚠ Xóa Cloud lỗi', 'red');
+                alert('Không thể xóa toàn bộ dữ liệu: ' + (error.message || error));
+            } finally {
+                if (confirmBtn) {
+                    confirmBtn.disabled = false;
+                    confirmBtn.style.opacity = '';
+                    confirmBtn.innerText = 'XÓA TOÀN BỘ';
+                }
+            }
         }
 
         function closeDataEditors() {
@@ -1739,8 +1871,13 @@ favorite:!!item.favorite, showDetail:!!item.showDetail,
             }
 
             const items = parsedRows.map(row => ({
-                lesson: row.lesson, h: row.h, p: row.p, m: row.m,
-                favorite: !!row.favorite, showDetail:false, isOriginal:false
+                lesson: row.lesson,
+                h: row.h,
+                p: row.p,
+                m: row.m,
+                favorite: !!row.favorite,
+                showDetail: false,
+                isOriginal: false
             }));
 
             const invalid = items.filter(x => !x.lesson || !x.h || !x.p || !x.m);
@@ -1750,20 +1887,45 @@ favorite:!!item.favorite, showDetail:!!item.showDetail,
                 return;
             }
 
+            // Gộp các dòng trùng ngay trong phần nhập theo ĐÚNG 3 thành phần:
+            // Hán tự + Pinyin + Nghĩa.
             const unique = new Map();
             let duplicates = 0;
             items.forEach(item => {
                 const key = vocabKey(item);
-                if (unique.has(key)) duplicates++;
-                else unique.set(key, item);
+                if (unique.has(key)) {
+                    duplicates++;
+                    // Giữ dòng cuối cùng trong Excel làm dữ liệu cập nhật.
+                    unique.set(key, item);
+                } else {
+                    unique.set(key, item);
+                }
             });
 
-            const existing = new Set(vocabulary.map(v => vocabKey(v)));
-            const toSave = [...unique.values()].filter(item => !existing.has(vocabKey(item)));
+            const existingByKey = new Map(vocabulary.map(v => [vocabKey(v), v]));
+            const toCreate = [];
+            const toUpdate = [];
 
-            if (!toSave.length) {
-                setStatus(`✓ Không có từ mới để lưu. ${duplicates ? `Bỏ qua ${duplicates} dòng trùng.` : ''}`, 'orange');
-                alert(`Không có từ mới để lưu.${duplicates ? `\nĐã bỏ qua ${duplicates} dòng trùng trong phần nhập.` : ''}`);
+            unique.forEach(item => {
+                const old = existingByKey.get(vocabKey(item));
+                if (old) {
+                    // Nếu từ đã có trên Cloud, KHÔNG báo "không có từ mới" rồi dừng.
+                    // Dữ liệu Excel sẽ cập nhật Bài học + mức Yêu thích.
+                    const changed =
+                        String(old.lesson || '').trim() !== String(item.lesson || '').trim() ||
+                        !!old.favorite !== !!item.favorite;
+
+                    if (changed) {
+                        toUpdate.push({ item, old });
+                    }
+                } else {
+                    toCreate.push(item);
+                }
+            });
+
+            if (!toCreate.length && !toUpdate.length) {
+                setStatus(`✓ Dữ liệu đã tồn tại và không có thay đổi.${duplicates ? ` Bỏ qua ${duplicates} dòng trùng.` : ''}`, 'orange');
+                alert(`Không có dữ liệu mới hoặc thay đổi để lưu.${duplicates ? `\nĐã gộp ${duplicates} dòng trùng trong phần nhập.` : ''}`);
                 return;
             }
 
@@ -1774,21 +1936,55 @@ favorite:!!item.favorite, showDetail:!!item.showDetail,
                 return;
             }
 
-            const ops = toSave.map(item => ({
-                type:'set',
-                ref:col.doc(vocabDocId(item)),
-                data:{
-                    h:item.h, p:item.p, m:item.m, lesson:item.lesson,
-                    favorite:!!item.favorite, showDetail:false, isOriginal:false,
-                    createdAt:firebase.firestore.FieldValue.serverTimestamp(),
-                    updatedAt:firebase.firestore.FieldValue.serverTimestamp()
-                }
-            }));
+            const ops = [];
+
+            toCreate.forEach(item => {
+                ops.push({
+                    type:'set',
+                    ref:col.doc(vocabDocId(item)),
+                    data:{
+                        h:item.h,
+                        p:item.p,
+                        m:item.m,
+                        lesson:item.lesson,
+                        favorite:!!item.favorite,
+                        showDetail:false,
+                        isOriginal:false,
+                        createdAt:firebase.firestore.FieldValue.serverTimestamp(),
+                        updatedAt:firebase.firestore.FieldValue.serverTimestamp()
+                    }
+                });
+            });
+
+            toUpdate.forEach(({item, old}) => {
+                ops.push({
+                    type:'set',
+                    ref:col.doc(vocabDocId(old)),
+                    data:{
+                        h:old.h,
+                        p:old.p,
+                        m:old.m,
+                        lesson:item.lesson,
+                        favorite:!!item.favorite,
+                        showDetail:!!old.showDetail,
+                        isOriginal:!!old.isOriginal,
+                        updatedAt:firebase.firestore.FieldValue.serverTimestamp()
+                    },
+                    options:{merge:true}
+                });
+            });
 
             try {
-                if (saveBtn) { saveBtn.disabled = true; saveBtn.style.opacity = '0.6'; }
-                setStatus(`☁ Đang lưu ${toSave.length} từ lên Cloud...`, 'blue');
-                setCloudStatus(`☁ Đang lưu ${toSave.length} từ...`, 'blue');
+                if (saveBtn) {
+                    saveBtn.disabled = true;
+                    saveBtn.style.opacity = '0.6';
+                }
+
+                const actionText = [];
+                if (toCreate.length) actionText.push(`thêm ${toCreate.length}`);
+                if (toUpdate.length) actionText.push(`cập nhật ${toUpdate.length}`);
+                setStatus(`☁ Đang ${actionText.join(' và ')} từ trên Cloud...`, 'blue');
+                setCloudStatus(`☁ Đang lưu ${toCreate.length + toUpdate.length} từ...`, 'blue');
 
                 await writeBatchChunks(ops);
                 await loadCloudVocabulary();
@@ -1796,15 +1992,20 @@ favorite:!!item.favorite, showDetail:!!item.showDetail,
                 clearBulkDataText();
                 closeDataEditors();
                 setCloudStatus('☁ Đã đồng bộ', 'green');
-                setStatus(`✓ Đã lưu ${toSave.length} từ lên Cloud.`, 'green');
-                alert(`Đã lưu ${toSave.length} từ mới lên Cloud.${duplicates ? `\nBỏ qua ${duplicates} dòng trùng trong phần nhập.` : ''}`);
+
+                const summary = `✓ Đã lưu: ${toCreate.length} từ mới, cập nhật: ${toUpdate.length} từ.${duplicates ? ` Gộp ${duplicates} dòng trùng.` : ''}`;
+                setStatus(summary, 'green');
+                alert(`Hoàn tất lưu dữ liệu lên Cloud.\n\n• Từ mới: ${toCreate.length}\n• Từ đã cập nhật: ${toUpdate.length}${duplicates ? `\n• Dòng trùng đã gộp: ${duplicates}` : ''}`);
             } catch(error) {
                 console.error('Bulk vocabulary save error:', error);
                 setCloudStatus('⚠ Lưu Cloud lỗi', 'red');
                 setStatus('⚠ Lưu Cloud thất bại: ' + (error.message || error), 'red');
                 alert('Không thể lưu dữ liệu lên Cloud: ' + (error.message || error));
             } finally {
-                if (saveBtn) { saveBtn.disabled = false; saveBtn.style.opacity = ''; }
+                if (saveBtn) {
+                    saveBtn.disabled = false;
+                    saveBtn.style.opacity = '';
+                }
             }
         }
 
