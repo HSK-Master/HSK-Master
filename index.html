@@ -721,10 +721,6 @@
                     <span class="font-black text-xs">VN</span>
                 </button>
 
-                <button onclick="speakCurrentItem()" class="icon-btn-40" title="Phát âm thanh">
-                    <i class="fa-solid fa-ear-listen"></i>
-                </button>
-                
                 <button id="btn-mute-toggle" onclick="toggleMute()" class="icon-btn-40" title="Tắt/Bật toàn bộ âm thanh">
                     <i class="fa-solid fa-volume-xmark"></i>
                 </button>
@@ -813,9 +809,10 @@
                 </div>
                 <div class="p-3 overflow-x-auto">
                     <table class="vocab-table data-entry-table">
-                        <thead><tr><th>Bài học</th><th>Hán tự</th><th>Pinyin</th><th>Nghĩa</th><th>⭐</th><th></th></tr></thead>
+                        <thead><tr><th>Tên bài học</th><th>Hán tự - Pinyin - Nghĩa</th><th class="w-24 text-center">Mức yêu thích</th><th class="w-16"></th></tr></thead>
                         <tbody id="bulk-data-rows"></tbody>
                     </table>
+                    <p class="text-[10px] text-custom-muted mt-2 px-1">Quy tắc dán từ Excel: <b>Tên bài học</b> TAB <b>Hán tự - Pinyin - Nghĩa</b> TAB <b>yes/no</b>. Ví dụ: H5 - 17 TAB 事物 - shìwù - Sự vật TAB yes</p>
                 </div>
                 <div class="p-4 border-t flex flex-wrap gap-2">
                     <button onclick="addBulkDataRow()" class="bg-slate-200 dark:bg-slate-800 px-4 py-3 rounded-xl text-[10px] font-bold uppercase"><i class="fa-solid fa-plus mr-1"></i> THÊM DÒNG</button>
@@ -825,11 +822,64 @@
                 </div>
             </div>
 
+            <!-- CỤM ĐIỀU KHIỂN HIỂN THỊ DATA -->
+            <div class="bg-custom-card p-5 rounded-2xl border shadow-sm space-y-5">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-4">
+                        <div>
+                            <div class="flex justify-between items-center mb-2">
+                                <label class="text-[11px] font-bold text-custom-muted uppercase tracking-wider">Cỡ chữ bảng</label>
+                                <span id="table-font-size-val" class="text-xs font-bold text-blue-500">15px</span>
+                            </div>
+                            <input type="range" id="table-font-size-slider" min="10" max="40" value="15" oninput="updateTableFontSize(this.value)" class="w-full">
+                        </div>
+                        <div>
+                            <div class="flex justify-between items-center mb-2">
+                                <label class="text-[11px] font-bold text-custom-muted uppercase tracking-wider">Zoom toàn trang</label>
+                                <span id="page-zoom-val" class="text-xs font-bold text-orange-500">135%</span>
+                            </div>
+                            <input type="range" id="page-zoom-slider" min="50" max="150" value="135" oninput="updatePageZoom(this.value)" class="w-full">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="text-[11px] font-bold text-custom-muted uppercase tracking-wider mb-3 block">Độ đậm Hán tự / Pinyin / Nghĩa</label>
+                        <div class="space-y-3">
+                            <div class="flex items-center gap-2">
+                                <span class="text-[9px] font-bold text-custom-muted w-14">HÁN TỰ</span>
+                                <input id="weight-hanzi-slider" type="range" min="100" max="900" step="50" value="450" oninput="updateWeight('hanzi', this.value)" class="flex-1">
+                                <span id="weight-hanzi-val" class="text-[9px] font-bold text-custom-muted w-8 text-right">450</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-[9px] font-bold text-custom-muted w-14">PINYIN</span>
+                                <input id="weight-pinyin-slider" type="range" min="100" max="900" step="50" value="400" oninput="updateWeight('pinyin', this.value)" class="flex-1">
+                                <span id="weight-pinyin-val" class="text-[9px] font-bold text-custom-muted w-8 text-right">400</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-[9px] font-bold text-custom-muted w-14">NGHĨA</span>
+                                <input id="weight-meaning-slider" type="range" min="100" max="900" step="50" value="400" oninput="updateWeight('meaning', this.value)" class="flex-1">
+                                <span id="weight-meaning-val" class="text-[9px] font-bold text-custom-muted w-8 text-right">400</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="pt-4 border-t border-slate-200 dark:border-slate-800">
+                    <label class="text-[11px] font-bold text-custom-muted uppercase tracking-wider mb-3 block">Màu sắc Hán tự / Pinyin / Nghĩa</label>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        <div class="color-picker-container"><input type="color" id="color-hanzi" value="#ef4444" oninput="updateColors()" class="w-8 h-8 p-0 border-none rounded bg-transparent cursor-pointer"><label class="text-[10px] font-bold text-custom-muted uppercase">Hán tự</label></div>
+                        <div class="color-picker-container"><input type="color" id="color-pinyin" value="#22c55e" oninput="updateColors()" class="w-8 h-8 p-0 border-none rounded bg-transparent cursor-pointer"><label class="text-[10px] font-bold text-custom-muted uppercase">Pinyin</label></div>
+                        <div class="color-picker-container"><input type="color" id="color-meaning" value="#3b82f6" oninput="updateColors()" class="w-8 h-8 p-0 border-none rounded bg-transparent cursor-pointer"><label class="text-[10px] font-bold text-custom-muted uppercase">Nghĩa</label></div>
+                    </div>
+                </div>
+            </div>
+
             <div class="bg-custom-card rounded-2xl border overflow-hidden shadow-sm">
                 <div class="px-4 py-3 border-b space-y-3">
                     <div class="flex flex-wrap justify-between items-center gap-2">
                         <span class="text-xs font-bold uppercase text-custom-muted">Danh sách từ vựng</span>
-                        <div class="flex flex-wrap gap-2">
+                        <div class="flex flex-wrap gap-2 items-center">
+                            <select id="table-lesson-filter" onchange="selectTableLesson(this.value)" class="h-8 px-2 bg-custom-card border border-slate-200 dark:border-slate-700 rounded-lg text-[10px] font-bold text-custom-muted outline-none">
+                                <option value="__ALL__">Tất cả bài học</option>
+                            </select>
                             <button id="table-filter-all" onclick="setTableFilter('all')" class="px-3 h-8 bg-blue-600 text-white rounded-lg text-[10px] font-bold uppercase">Tất cả</button>
                             <button id="table-filter-favorite" onclick="setTableFilter('favorite')" class="px-3 h-8 bg-slate-200 dark:bg-slate-800 text-custom-muted rounded-lg text-[10px] font-bold uppercase">⭐ Yêu thích</button>
                             <button id="toggle-sound-btn" onclick="toggleTableSound()" class="w-[80px] h-8 bg-emerald-600 text-white rounded-lg text-[10px] font-bold uppercase">Tắt âm</button>
@@ -1194,8 +1244,8 @@
     	storageBucket: "hsk-master-7fc94.firebasestorage.app",
     	messagingSenderId: "1073522178190",
     	appId: "1:1073522178190:web:bfaf7bcc44079efe54b1df",
-   	measurementId: "G-Z6SYKZDKEL"
- 	};
+    	measurementId: "G-Z6SYKZDKEL"
+  	};
 
 
         // Mật khẩu bảo vệ thao tác chỉnh sửa dữ liệu trên giao diện.
@@ -1251,6 +1301,7 @@
         let hideMeaningPinyin = false;
         let tableSoundEnabled = true;
         let tableFilter = 'all';
+        let selectedTableLesson = '__ALL__';
         let selectedQuizLesson = '__ALL__';
         let selectedFlashLesson = '__ALL__';
 
@@ -1601,11 +1652,10 @@ favorite:!!item.favorite, showDetail:!!item.showDetail,
         function createBulkRow(item = {}) {
             const tr = document.createElement('tr');
             tr.className = 'data-entry-row';
+            const combined = item.h || item.p || item.m ? [item.h || '', item.p || '', item.m || ''].filter(Boolean).join(' - ') : '';
             tr.innerHTML = `
-                <td><input class="data-entry-input bulk-lesson" value="${escapeHtml(item.lesson || '')}" placeholder="Bài 1"></td>
-                <td><input class="data-entry-input bulk-hanzi chinese-font" value="${escapeHtml(item.h || '')}" placeholder="你好"></td>
-                <td><input class="data-entry-input bulk-pinyin" value="${escapeHtml(item.p || '')}" placeholder="nǐ hǎo"></td>
-                <td><input class="data-entry-input bulk-meaning" value="${escapeHtml(item.m || '')}" placeholder="xin chào"></td>
+                <td><input class="data-entry-input bulk-lesson" value="${escapeHtml(item.lesson || '')}" placeholder="H5 - 17"></td>
+                <td><input class="data-entry-input bulk-combined" value="${escapeHtml(combined)}" placeholder="事物 - shìwù - Sự vật"></td>
                 <td><select class="data-entry-input bulk-favorite"><option value="no" ${item.favorite ? '' : 'selected'}>no</option><option value="yes" ${item.favorite ? 'selected' : ''}>yes</option></select></td>
                 <td class="text-center"><button type="button" onclick="this.closest('tr').remove()" class="vocab-action-btn delete" title="Xóa dòng"><i class="fa-solid fa-trash text-[10px]"></i></button></td>`;
             return tr;
@@ -1620,23 +1670,32 @@ favorite:!!item.favorite, showDetail:!!item.showDetail,
             const tbody = document.getElementById('bulk-data-rows');
             if (!tbody) return;
             [...tbody.querySelectorAll('tr')].forEach(tr => {
-                const h = tr.querySelector('.bulk-hanzi')?.value.trim();
-                if (!h) tr.remove();
+                const combined = tr.querySelector('.bulk-combined')?.value.trim();
+                if (!combined) tr.remove();
             });
             if (!tbody.children.length) addBulkDataRow();
         }
 
+        function parseBulkCombinedValue(combined) {
+            const parts = String(combined || '').trim().split(/\s+-\s+/);
+            if (parts.length < 3) return {h:'', p:'', m:''};
+            return { h: parts[0].trim(), p: parts[1].trim(), m: parts.slice(2).join(' - ').trim() };
+        }
+
         function pasteBulkData() {
             if (!dataFileUnlocked) { unlockData(); return; }
-            const text = prompt('Dán dữ liệu theo 5 cột, cách nhau bằng TAB:\nBài học | Hán tự | Pinyin | Nghĩa | yes/no\n\nBạn có thể copy trực tiếp từ Excel/Google Sheets.');
+            const text = prompt('Dán dữ liệu từ Excel theo đúng 3 cột, cách nhau bằng TAB:\n\nTên bài học | Hán tự - Pinyin - Nghĩa | yes/no\n\nVí dụ:\nH5 - 17\t事物 - shìwù - Sự vật\tyes\nH5 - 17\t高峰 - gāofēng - Đỉnh cao, cao điểm\tyes');
             if (text === null) return;
-            const rows = text.split(/\r?\n/).filter(Boolean);
+            const rows = text.split(/\r?\n/).filter(line => line.trim());
             const tbody = document.getElementById('bulk-data-rows');
             if (!tbody) return;
             tbody.innerHTML = '';
             rows.forEach(line => {
                 const c = line.split('\t');
-                if (c.length >= 2) addBulkDataRow({lesson:c[0]||'', h:c[1]||'', p:c[2]||'', m:c[3]||'', favorite:parseFavoriteValue(c[4]||'no')});
+                if (c.length >= 2) {
+                    const parsed = parseBulkCombinedValue(c[1]);
+                    addBulkDataRow({ lesson:c[0] || '', h:parsed.h, p:parsed.p, m:parsed.m, favorite:parseFavoriteValue(c[2] || 'no') });
+                }
             });
             if (!tbody.children.length) addBulkDataRow();
         }
@@ -1647,7 +1706,8 @@ favorite:!!item.favorite, showDetail:!!item.showDetail,
             if (!item.h || !item.p || !item.m) { alert('Hán tự, Pinyin và Nghĩa không được để trống.'); return; }
             if (vocabulary.some(v => vocabKey(v) === vocabKey(item))) { alert('Từ này đã tồn tại với cùng Hán tự + Pinyin + Nghĩa.'); return; }
             try {
-                await persistVocabularyItem(item);
+                const ok = await persistVocabularyItem(item);
+                if (!ok) return;
                 vocabulary.push(item);
                 vocabulary.sort((a,b) => a.h.localeCompare(b.h));
                 document.getElementById('new-data-hanzi').value=''; document.getElementById('new-data-pinyin').value=''; document.getElementById('new-data-meaning').value='';
@@ -1659,9 +1719,17 @@ favorite:!!item.favorite, showDetail:!!item.showDetail,
         async function saveBulkData() {
             if (!dataFileUnlocked) { unlockData(); return; }
             const rows = [...document.querySelectorAll('#bulk-data-rows tr')];
-            const items = rows.map(tr => ({ lesson:tr.querySelector('.bulk-lesson')?.value.trim() || '', h:tr.querySelector('.bulk-hanzi')?.value.trim() || '', p:tr.querySelector('.bulk-pinyin')?.value.trim() || '', m:tr.querySelector('.bulk-meaning')?.value.trim() || '', favorite:tr.querySelector('.bulk-favorite')?.value === 'yes', showDetail:false, isOriginal:true })).filter(x => x.h || x.p || x.m || x.lesson);
+            const items = rows.map(tr => {
+                const parsed = parseBulkCombinedValue(tr.querySelector('.bulk-combined')?.value || '');
+                return {
+                    lesson:tr.querySelector('.bulk-lesson')?.value.trim() || '',
+                    h:parsed.h, p:parsed.p, m:parsed.m,
+                    favorite:tr.querySelector('.bulk-favorite')?.value === 'yes',
+                    showDetail:false, isOriginal:true
+                };
+            }).filter(x => x.h || x.p || x.m || x.lesson);
             const invalid = items.filter(x => !x.h || !x.p || !x.m);
-            if (invalid.length) { alert(`Có ${invalid.length} dòng chưa đủ Hán tự + Pinyin + Nghĩa.`); return; }
+            if (invalid.length) { alert(`Có ${invalid.length} dòng chưa đúng định dạng Hán tự - Pinyin - Nghĩa.`); return; }
             const unique = new Map(); let duplicates = 0;
             items.forEach(item => { const key=vocabKey(item); if(unique.has(key)) duplicates++; else unique.set(key,item); });
             const existing = new Set(vocabulary.map(v => vocabKey(v)));
@@ -1840,6 +1908,20 @@ favorite:!!item.favorite, showDetail:!!item.showDetail,
             updatePageZoom(pageZoom);
         }
 
+        function initDisplayControls() {
+            initColors();
+            initZoom();
+            const tableSlider = document.getElementById('table-font-size-slider');
+            if (tableSlider) { tableSlider.value = tableFontSize; updateTableFontSize(tableFontSize); }
+            ['hanzi','pinyin','meaning'].forEach(type => {
+                const slider = document.getElementById(`weight-${type}-slider`);
+                if (slider) slider.value = weights[type];
+                const label = document.getElementById(`weight-${type}-val`);
+                if (label) label.innerText = weights[type];
+            });
+            applyColorStyles();
+        }
+
         function updatePageZoom(val) {
             pageZoom = val;
             const valLabel = document.getElementById('page-zoom-val');
@@ -1856,7 +1938,9 @@ favorite:!!item.favorite, showDetail:!!item.showDetail,
         }
 
         function updateWeight(type, val) {
-            weights[type] = val;
+            weights[type] = Number(val);
+            const label = document.getElementById(`weight-${type}-val`);
+            if (label) label.innerText = val;
             applyColorStyles();
             renderTable();
         }
@@ -1901,15 +1985,39 @@ favorite:!!item.favorite, showDetail:!!item.showDetail,
             renderTable();
         }
 
+        function selectTableLesson(value) {
+            selectedTableLesson = value || '__ALL__';
+            renderTable();
+        }
+
+        function updateTableLessonFilter() {
+            const select = document.getElementById('table-lesson-filter');
+            if (!select) return;
+            const lessons = getLessonList();
+            const options = ['__ALL__', ...lessons];
+            if (!options.includes(selectedTableLesson)) selectedTableLesson = '__ALL__';
+            select.innerHTML = options.map(lesson => {
+                const label = lesson === '__ALL__' ? 'Tất cả bài học' : lesson;
+                return `<option value="${escapeHtml(lesson)}" ${lesson === selectedTableLesson ? 'selected' : ''}>${escapeHtml(label)}</option>`;
+            }).join('');
+        }
+
         function renderTable() {
             const tbody = document.getElementById('vocab-list');
             if (!tbody) return;
             tbody.innerHTML = '';
-            const filtered = vocabulary.filter(item => tableFilter === 'favorite' ? !!item.favorite : true);
+            updateTableLessonFilter();
+            let filtered = vocabulary.filter(item => tableFilter === 'favorite' ? !!item.favorite : true);
+            if (selectedTableLesson !== '__ALL__') {
+                filtered = filtered.filter(item => String(item.lesson || '').trim() === String(selectedTableLesson).trim());
+            }
             const status = document.getElementById('table-filter-status');
-            if (status) status.innerText = tableFilter === 'favorite'
-                ? `Đang hiển thị ${filtered.length}/${vocabulary.length} từ yêu thích.`
-                : `Đang hiển thị toàn bộ ${vocabulary.length} từ.`;
+            if (status) {
+                const lessonText = selectedTableLesson === '__ALL__' ? '' : ` • ${selectedTableLesson}`;
+                status.innerText = tableFilter === 'favorite'
+                    ? `Đang hiển thị ${filtered.length}/${vocabulary.length} từ yêu thích${lessonText}.`
+                    : `Đang hiển thị ${filtered.length}/${vocabulary.length} từ${lessonText}.`;
+            }
             const allBtn = document.getElementById('table-filter-all');
             const favBtn = document.getElementById('table-filter-favorite');
             if (allBtn && favBtn) {
@@ -1921,10 +2029,10 @@ favorite:!!item.favorite, showDetail:!!item.showDetail,
                 const showDetail = !hideMeaningPinyin || item.showDetail === true;
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td class="lesson-cell" style="font-size:${Math.max(11, tableFontSize * .8)}px; font-weight:700;">${escapeHtml(item.lesson || '-')}</td>
-                    <td class="hanzi-cell chinese-font" style="font-size:${tableFontSize * 1.7}px; line-height:1.2; cursor:pointer;" onclick="handleHanziClick(${index})">${escapeHtml(item.h)}</td>
-                    <td class="pinyin-cell" style="font-size:${tableFontSize}px; line-height:1.2; ${showDetail ? '' : 'color:transparent;'}">${showDetail ? escapeHtml(item.p) : '-'}</td>
-                    <td class="meaning-cell" style="font-size:${tableFontSize}px; line-height:1.2; ${showDetail ? '' : 'color:transparent;'}">${showDetail ? escapeHtml(item.m) : '-'}</td>
+                    <td class="lesson-cell" style="font-size:${Math.max(11, Number(tableFontSize) * .8)}px; font-weight:700;">${escapeHtml(item.lesson || '-')}</td>
+                    <td class="hanzi-cell chinese-font" style="font-size:${Number(tableFontSize) * 1.7}px; line-height:1.2; cursor:pointer;" onclick="handleHanziClick(${index})">${escapeHtml(item.h)}</td>
+                    <td class="pinyin-cell" style="font-size:${Number(tableFontSize)}px; line-height:1.2; ${showDetail ? '' : 'color:transparent;'}">${showDetail ? escapeHtml(item.p) : '-'}</td>
+                    <td class="meaning-cell" style="font-size:${Number(tableFontSize)}px; line-height:1.2; ${showDetail ? '' : 'color:transparent;'}">${showDetail ? escapeHtml(item.m) : '-'}</td>
                     <td class="text-center">
                         <button type="button" onclick="toggleFavorite(${index}); return false;" class="favorite-table-btn ${item.favorite ? 'is-favorite' : ''}" style="color:${item.favorite ? '#facc15' : '#cbd5e1'} !important;-webkit-text-fill-color:${item.favorite ? '#facc15' : '#cbd5e1'} !important;" title="${item.favorite ? 'Bỏ yêu thích' : 'Thêm yêu thích'}">${item.favorite ? '★' : '☆'}</button>
                     </td>
@@ -1934,6 +2042,86 @@ favorite:!!item.favorite, showDetail:!!item.showDetail,
                     </td>`;
                 tbody.appendChild(tr);
             });
+        }
+
+        function closeVocabEditModal() {
+            document.getElementById('vocab-edit-modal')?.classList.add('hidden');
+        }
+
+        function editVocabulary(index) {
+            if (!dataFileUnlocked) { unlockData(); return; }
+            const item = vocabulary[index];
+            if (!item) return;
+            document.getElementById('edit-vocab-old-key').value = vocabKey(item);
+            document.getElementById('edit-vocab-lesson').value = item.lesson || '';
+            document.getElementById('edit-vocab-hanzi').value = item.h || '';
+            document.getElementById('edit-vocab-pinyin').value = item.p || '';
+            document.getElementById('edit-vocab-meaning').value = item.m || '';
+            document.getElementById('edit-vocab-favorite').value = item.favorite ? 'yes' : 'no';
+            document.getElementById('vocab-edit-modal')?.classList.remove('hidden');
+            setTimeout(() => document.getElementById('edit-vocab-hanzi')?.focus(), 50);
+        }
+
+        async function saveVocabEdit() {
+            if (!dataFileUnlocked) { unlockData(); return; }
+            const oldKey = document.getElementById('edit-vocab-old-key')?.value || '';
+            const oldItem = vocabulary.find(v => vocabKey(v) === oldKey);
+            if (!oldItem) { alert('Không tìm thấy từ vựng cần chỉnh sửa.'); return; }
+            const updated = {
+                h: document.getElementById('edit-vocab-hanzi')?.value.trim() || '',
+                p: document.getElementById('edit-vocab-pinyin')?.value.trim() || '',
+                m: document.getElementById('edit-vocab-meaning')?.value.trim() || '',
+                lesson: document.getElementById('edit-vocab-lesson')?.value.trim() || '',
+                favorite: document.getElementById('edit-vocab-favorite')?.value === 'yes',
+                showDetail: !!oldItem.showDetail,
+                isOriginal: !!oldItem.isOriginal
+            };
+            if (!updated.h || !updated.p || !updated.m) { alert('Hán tự, Pinyin và Nghĩa không được để trống.'); return; }
+            const newKey = vocabKey(updated);
+            if (newKey !== oldKey && vocabulary.some(v => vocabKey(v) === newKey)) {
+                alert('Từ mới đã tồn tại với cùng Hán tự + Pinyin + Nghĩa.');
+                return;
+            }
+            try {
+                const col = getVocabularyCollection();
+                if (!col) throw new Error('Chưa kết nối Cloud.');
+                const batch = firebase.firestore().batch();
+                if (newKey !== oldKey) batch.delete(col.doc(vocabDocId(oldItem)));
+                batch.set(col.doc(vocabDocId(updated)), {
+                    h:updated.h, p:updated.p, m:updated.m, lesson:updated.lesson,
+                    favorite:!!updated.favorite, showDetail:!!updated.showDetail, isOriginal:!!updated.isOriginal,
+                    updatedAt:firebase.firestore.FieldValue.serverTimestamp()
+                }, {merge:true});
+                await batch.commit();
+                const localIndex = vocabulary.indexOf(oldItem);
+                if (localIndex >= 0) vocabulary[localIndex] = updated;
+                vocabulary.sort((a,b) => { const ah=a.h.localeCompare(b.h), ap=a.p.localeCompare(b.p), am=a.m.localeCompare(b.m); return ah||ap||am; });
+                closeVocabEditModal();
+                renderTable(); updateFavoriteCountHint(); renderLessonSelectors(); updateQuestionSourceUI(); updateFlashSourceUI();
+                setCloudStatus('☁ Đã cập nhật từ vựng', 'green');
+            } catch (error) {
+                console.error('Save vocab edit error:', error);
+                alert('Không thể cập nhật từ vựng: ' + (error.message || error));
+            }
+        }
+
+        async function deleteVocabulary(index) {
+            if (!dataFileUnlocked) { unlockData(); return; }
+            const item = vocabulary[index];
+            if (!item) return;
+            const label = `${item.h} - ${item.p} - ${item.m}`;
+            if (!confirm(`Xóa vĩnh viễn từ này khỏi Cloud?\n\n${label}`)) return;
+            try {
+                const col = getVocabularyCollection();
+                if (!col) throw new Error('Chưa kết nối Cloud.');
+                await col.doc(vocabDocId(item)).delete();
+                vocabulary.splice(index, 1);
+                renderTable(); updateFavoriteCountHint(); renderLessonSelectors(); updateQuestionSourceUI(); updateFlashSourceUI();
+                setCloudStatus('☁ Đã xóa từ vựng', 'green');
+            } catch (error) {
+                console.error('Delete vocab error:', error);
+                alert('Không thể xóa từ vựng: ' + (error.message || error));
+            }
         }
 
         function isFavorite(item) { return !!(item && item.favorite); }
@@ -2722,6 +2910,7 @@ favorite:!!item.favorite, showDetail:!!item.showDetail,
             updateDataLockUI();
             updateQuestionSourceUI();
             updateFlashSourceUI();
+            initDisplayControls();
             initFirebaseCloud();
         });
     </script>
