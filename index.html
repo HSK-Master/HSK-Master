@@ -357,6 +357,15 @@
         .data-entry-input { width: 100%; min-width: 120px; height: 38px; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-main); border-radius: 9px; padding: 7px 9px; outline: none; font-size: 12px; }
         .data-entry-input:focus { border-color: #3b82f6; box-shadow: 0 0 0 2px rgba(59,130,246,.12); }
         .data-entry-row td { padding: 4px; }
+        .data-paste-textarea {
+            display: block; width: 100%; min-height: 200px; height: 200px;
+            box-sizing: border-box; resize: vertical;
+            border: 1px solid var(--border-color);
+            border-radius: 14px; background: var(--bg-card); color: var(--text-main);
+            padding: 16px; outline: none; font-family: inherit; font-size: 14px;
+            line-height: 1.65; white-space: pre; overflow: auto;
+        }
+        .data-paste-textarea:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,.12); }
 
         .text-custom-muted { color: var(--text-muted); }
 
@@ -781,15 +790,6 @@
                         </p>
                     </div>
                     <button onclick="closeDataEditors()" class="icon-btn-40"><i class="fa-solid fa-xmark"></i></button>
-                </div>
-
-                <div class="rounded-xl border bg-slate-50 dark:bg-slate-900/50 p-3 mb-3">
-                    <div class="text-[10px] font-bold text-custom-muted uppercase mb-2">ĐỊNH DẠNG DỮ LIỆU</div>
-                    <div class="text-[11px] leading-relaxed text-custom-muted">
-                        Mỗi dòng gồm đúng 3 cụm, ngăn cách bằng <b>phím TAB</b>:
-                        <br><b>Tên bài học</b> TAB <b>Hán tự - Pinyin - Nghĩa</b> TAB <b>yes/no</b>
-                        <br><br>Ví dụ: <code>H5 - 17	事物 - shìwù - Sự vật	yes</code>
-                    </div>
                 </div>
 
                 <textarea id="bulk-data-textarea" class="data-paste-textarea" spellcheck="false"
