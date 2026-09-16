@@ -1188,14 +1188,14 @@
         // FIREBASE CLOUD-ONLY — KHÔNG DÙNG LOCALSTORAGE
         // =========================================================
         const FIREBASE_CONFIG = {
-    apiKey: "AIzaSyAXVYNJMY4JvWP1CtoXAcr8q1wHgFg3yP4",
-    authDomain: "hsk-master-7fc94.firebaseapp.com",
-    projectId: "hsk-master-7fc94",
-    storageBucket: "hsk-master-7fc94.firebasestorage.app",
-    messagingSenderId: "1073522178190",
-    appId: "1:1073522178190:web:bfaf7bcc44079efe54b1df",
-    measurementId: "G-Z6SYKZDKEL"
-  };
+    	apiKey: "AIzaSyAXVYNJMY4JvWP1CtoXAcr8q1wHgFg3yP4",
+    	authDomain: "hsk-master-7fc94.firebaseapp.com",
+    	projectId: "hsk-master-7fc94",
+    	storageBucket: "hsk-master-7fc94.firebasestorage.app",
+    	messagingSenderId: "1073522178190",
+    	appId: "1:1073522178190:web:bfaf7bcc44079efe54b1df",
+   	measurementId: "G-Z6SYKZDKEL"
+ 	};
 
 
         // Mật khẩu bảo vệ thao tác chỉnh sửa dữ liệu trên giao diện.
@@ -1276,6 +1276,17 @@
         // Một bản ghi được xác định bởi TOÀN BỘ 3 thành phần:
         // Hán tự + Pinyin + Nghĩa. Cùng Hán tự nhưng khác Pinyin/Nghĩa
         // vẫn là các từ khác nhau và được phép tồn tại đồng thời.
+        // Mã hóa dữ liệu trước khi chèn vào innerHTML để tránh lỗi khi render
+        // và tránh HTML không mong muốn từ dữ liệu người dùng nhập vào.
+        function escapeHtml(value) {
+            return String(value ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
         function normalizeVocabPart(value, lower = false) {
             const s = String(value ?? '').normalize('NFC').trim().replace(/\s+/g, ' ');
             return lower ? s.toLowerCase() : s;
