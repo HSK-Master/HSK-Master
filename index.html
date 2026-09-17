@@ -585,8 +585,12 @@
            Các đoạn thông báo trong toàn bộ web dùng 11px,
            đồng nhất với tiêu đề "CỠ CHỮ BẢNG", "ZOOM TOÀN TRANG".
            ========================================================= */
+        /* =========================================================
+           THÔNG BÁO / TRẠNG THÁI
+           - Thông báo Cloud (#sync-status): 9px
+           - Tất cả thông báo/trạng thái khác: 11px
+           ========================================================= */
         .app-notice,
-        #sync-status,
         #data-lock-status,
         #data-editor-status,
         #bulk-save-status,
@@ -598,6 +602,13 @@
         #input-hint,
         #flash-lesson-hint {
             font-size: 11px !important;
+            line-height: 1.35 !important;
+        }
+
+        /* Riêng trạng thái Cloud luôn giữ đúng cỡ 9px,
+           kể cả khi setCloudStatus() thay đổi class bằng JavaScript. */
+        #sync-status {
+            font-size: 9px !important;
             line-height: 1.35 !important;
         }
 
@@ -1658,10 +1669,17 @@ H5 - 17	迅速 - xùnsù - Nhanh chóng	yes"></textarea>
             try { await writeBatchChunks(operations); } catch(error) { console.error('Legacy vocabulary migration error:', error); }
         }
 
+        // Thông báo Cloud: luôn 9px.
         function setCloudStatus(text, type = 'muted') {
             const el = document.getElementById('sync-status');
             if (!el) return;
-            const cls = { muted:'app-notice text-[9px] font-bold text-custom-muted uppercase', blue:'app-notice text-[9px] font-bold text-blue-500 uppercase', green:'app-notice text-[9px] font-bold text-emerald-500 uppercase', orange:'app-notice text-[9px] font-bold text-orange-500 uppercase', red:'app-notice text-[9px] font-bold text-red-500 uppercase' };
+            const cls = {
+                muted: 'app-notice text-[9px] font-bold text-custom-muted uppercase',
+                blue: 'app-notice text-[9px] font-bold text-blue-500 uppercase',
+                green: 'app-notice text-[9px] font-bold text-emerald-500 uppercase',
+                orange: 'app-notice text-[9px] font-bold text-orange-500 uppercase',
+                red: 'app-notice text-[9px] font-bold text-red-500 uppercase'
+            };
             el.className = cls[type] || cls.muted;
             el.innerText = text;
         }
