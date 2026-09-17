@@ -1661,7 +1661,7 @@ H5 - 17	迅速 - xùnsù - Nhanh chóng	yes"></textarea>
         function setCloudStatus(text, type = 'muted') {
             const el = document.getElementById('sync-status');
             if (!el) return;
-            const cls = { muted:'app-notice text-[11px] font-bold text-custom-muted uppercase', blue:'app-notice text-[11px] font-bold text-blue-500 uppercase', green:'app-notice text-[11px] font-bold text-emerald-500 uppercase', orange:'app-notice text-[11px] font-bold text-orange-500 uppercase', red:'app-notice text-[11px] font-bold text-red-500 uppercase' };
+            const cls = { muted:'app-notice text-[9px] font-bold text-custom-muted uppercase', blue:'app-notice text-[9px] font-bold text-blue-500 uppercase', green:'app-notice text-[9px] font-bold text-emerald-500 uppercase', orange:'app-notice text-[9px] font-bold text-orange-500 uppercase', red:'app-notice text-[9px] font-bold text-red-500 uppercase' };
             el.className = cls[type] || cls.muted;
             el.innerText = text;
         }
